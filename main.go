@@ -30,7 +30,8 @@ func main() {
 		}
 	}()
 
-	_, err := flags.ParseArgs(&opts, os.Args)
+	p := flags.NewParser(&opts, flags.HelpFlag)
+	_, err := p.ParseArgs(os.Args)
 	if err != nil {
 		panic(err)
 	}
