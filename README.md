@@ -53,4 +53,4 @@ prom-elastic-alert是一个基于查询Elasticsearch的告警组件.
 
 ### License
 
-BFE is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
+prom-elastic-alert is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
