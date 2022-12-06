@@ -1,0 +1,30 @@
+exporter:
+  enabled: true #是否开启exporter
+  listen_addr: ":9003" #监听exporter端口信息
+loader:
+  type: "FileLoader" #加载rule规则文件的实现方式,默认FileLoader
+  config:
+    rules_folder: "rules" #需要加载*.rule.yaml规则文件的目录,可以是相对路径也可以是绝对路径
+    rules_folder_recursion: false #是否递归搜索
+alert:
+  alertmanager:
+    url: "http://alertmanager:9093/api/v2/alerts" #alertmanager地址
+    basic_auth:
+      username: ""
+      password: ""
+  generator:
+    base_url: "http://localhost:9003/alert/message" #生成告警详情页面URL前缀
+    expire:  #告警详情保存时间
+      days: 1
+redis: #Redis配置信息
+  addr: "docker.for.mac.host.internal"
+  port: 6379
+  password: ""
+  db: 0
+run_every: #轮询从redis队列获取告警信息的频率,可以是seconds、minutes、days
+  seconds: 10
+buffer_time: #执行查询语句的时间窗口范围
+  minutes: 10
+alert_time_limit: #告警触发超过该时间，则忽略不发送
+  minutes: 10
+max_scrolling_count: 5 #翻页查询最大页数,每页默认10000. 如果是0,则表示无限制

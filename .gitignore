@@ -1,0 +1,6 @@
+.idea/*
+rules/**/*.yaml
+tmp/*
+example/prom-alert/db/*
+example/prom-alert/logs/*
+example/alertmanager/data/*

@@ -1,0 +1,54 @@
+version: "3"
+services:
+  prom-elastic-alert:
+    build:
+      context: ../
+    restart: always
+    depends_on:
+      - alertmanager
+    expose:
+      - 9003
+    ports:
+      - "9003:9003"
+    volumes:
+      - ../:/app/
+    command: ["--debug"]
+    healthcheck:
+      test: [ "CMD-SHELL", "ps aux | grep 'main.go' | grep -v 'grep' || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+  alertmanager:
+    image: prom/alertmanager:v0.23.0
+    user: root
+    restart: always
+    depends_on:
+      - prom-alert
+    volumes:
+      - ./alertmanager/conf:/etc/alertmanager
+      - ./alertmanager/data:/alertmanager
+    expose:
+      - 9093
+    ports:
+      - "9093:9093"
+    healthcheck:
+      test: [ "CMD-SHELL", "netstat -lntp | grep '9093' || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+  prom-alert:
+    image: feiyu563/prometheus-alert:v-4.6.1
+    restart: always
+    volumes:
+      - ./prom-alert/conf:/app/conf
+      - ./prom-alert/db:/app/db
+      - ./prom-alert/logs:/app/logs
+    expose:
+      - 8080
+    ports:
+      - "38080:8080"
+    healthcheck:
+      test: [ "CMD-SHELL", "netstat -lntp | grep '8080' || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3

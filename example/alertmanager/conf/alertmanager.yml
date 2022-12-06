@@ -1,0 +1,18 @@
+global:
+  resolve_timeout: 3m
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 3m
+  receiver: 'default-receiver'
+receivers:
+  - name: 'default-receiver'
+    webhook_configs:
+      - url: 'http://prom-alert:8080/prometheusalert?type=dd&tpl=prometheus-dd&rr=true&ddurl=https://oapi.dingtalk.com/robot/send?access_token=xxxxxxx'
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']

@@ -1,0 +1,27 @@
+unique_id: "NginxErrorLog" #rule告警规则的唯一ID
+enabled: true #是否开启, false则关闭此rule
+es: #要查询的ES地址信息
+  addresses:
+    - "http://127.0.0.1:9200"
+  username: ""
+  password: ""
+  version: "v7"
+index: "nginx-error-*" #Index信息
+run_every: #查询任务频率
+  seconds: 5
+query:
+  type: "frequency" #默认frequency
+  query_string: '$query_string' #query_string查询语句
+  config:
+    timeframe: #3分钟内
+      minutes: 3
+    num_events: 2 #如果查询到符合条件的日志数量>=2条,则触发告警
+  labels: #发送到alertmanager自定义的labels信息
+    alertname: "NginxErrorLog" #必填
+    instance: "localhost"
+    severity: "warning"
+    for_time: "2min"
+    threshold: "3"
+  annotations: #自定义annotations信息
+    description: "Nginx error日志条数 {{ .value }} > {{ .threshold }}"
+    summary: "Nginx错误日志告警"
