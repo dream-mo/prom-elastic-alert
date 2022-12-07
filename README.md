@@ -43,8 +43,8 @@ prom-elastic-alert是一个基于查询Elasticsearch的告警组件.
 
 ### 安装与使用
 
-- 1.下载release二进制文件,拷贝config.yaml,运行即可
-- 2.进入compose目录,使用docker-compose运行(example)
+- 1.下载[release](https://github.com/dream-mo/prom-elastic-alert/releases)二进制文件,拷贝config.yaml,运行即可
+- 2.进入compose目录,使用docker-compose运行([example](https://github.com/dream-mo/prom-elastic-alert/tree/main/example))
 - 3.自行编译, git clone 项目到本地, 之后go build即可
 
 ### 文档
