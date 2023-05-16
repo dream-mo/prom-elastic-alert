@@ -7,8 +7,8 @@ ARG TARGETARCH
 
 WORKDIR /app
 
-ENV GO111MODULE=on \
-    GOPROXY=https://goproxy.cn,direct
+ENV GO111MODULE=on
+    #GOPROXY=https://goproxy.cn,direct
 
 COPY . .
 
