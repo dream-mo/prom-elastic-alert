@@ -2,10 +2,11 @@ package alertmanager
 
 import (
 	"fmt"
-	"github.com/dream-mo/prom-elastic-alert/utils/logger"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/dream-mo/prom-elastic-alert/utils/logger"
 )
 
 const (

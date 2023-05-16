@@ -2,9 +2,10 @@ package boot
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/creasty/defaults"
 	"github.com/dream-mo/prom-elastic-alert/conf"
-	"reflect"
 )
 
 type Loader interface {

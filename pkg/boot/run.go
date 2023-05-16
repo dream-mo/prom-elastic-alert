@@ -5,6 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"github.com/creasty/defaults"
 	"github.com/dream-mo/prom-elastic-alert/conf"
 	"github.com/dream-mo/prom-elastic-alert/utils/alertmanager"
@@ -15,10 +20,6 @@ import (
 	"github.com/go-co-op/gocron"
 	"github.com/go-redis/redis/v8"
 	"github.com/prometheus/client_golang/prometheus"
-	"math"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 var (

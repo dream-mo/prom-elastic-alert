@@ -1,6 +1,9 @@
 package xelastic
 
 import (
+	"crypto/tls"
+	"net/http"
+
 	"github.com/dream-mo/prom-elastic-alert/conf"
 	"github.com/dream-mo/prom-elastic-alert/utils/logger"
 	elasticsearch7 "github.com/elastic/go-elasticsearch/v7"
@@ -16,6 +19,11 @@ func NewElasticClient(esConfig conf.EsConfig, version string) ElasticClient {
 		Addresses: esConfig.Addresses,
 		Username:  esConfig.Username,
 		Password:  esConfig.Password,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
 	})
 	if err != nil {
 		logger.Logger.Errorln(err)

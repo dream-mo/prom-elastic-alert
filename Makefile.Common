@@ -1,0 +1,21 @@
+GOCMD?= go
+LINT=golangci-lint
+
+.PHONY: fmt
+fmt:
+	gofmt  -w -s ./
+	goimports -w  -local github.com/openinsight/elastic-alert ./
+
+.PHONY: misspell
+misspell:
+	@echo "running $(MISSPELL)"
+	@$(MISSPELL) $(ALL_SRC_AND_DOC)
+
+.PHONY: lint
+lint: misspell
+	$(LINT) run --allow-parallel-runners
+
+.PHONY: tidy
+tidy:
+	rm -fr go.sum
+	$(GOCMD) mod tidy -compat=1.19

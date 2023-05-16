@@ -2,12 +2,13 @@ package boot
 
 import (
 	"encoding/json"
+	"html/template"
+	"net/http"
+
 	"github.com/dream-mo/prom-elastic-alert/conf"
 	redisx "github.com/dream-mo/prom-elastic-alert/utils/redis"
 	"github.com/dream-mo/prom-elastic-alert/utils/xelastic"
 	"github.com/dream-mo/prom-elastic-alert/utils/xtime"
-	"html/template"
-	"net/http"
 )
 
 func RenderAlertMessage(writer http.ResponseWriter, request *http.Request) {

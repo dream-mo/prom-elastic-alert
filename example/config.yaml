@@ -1,0 +1,30 @@
+exporter:
+  enabled: true
+  listen_addr: ":9003"
+loader:
+  type: "FileLoader"
+  config:
+    rules_folder: "rules"
+    rules_folder_recursion: false
+alert:
+  alertmanager:
+    url: "http://alertmanager:9093/api/v2/alerts"
+    basic_auth:
+      username: ""
+      password: ""
+  generator:
+    base_url: "http://localhost:9003/alert/message"
+    expire:
+      days: 1
+redis:
+  addr: "redis"
+  port: 6379
+  password: ""
+  db: 0
+run_every:
+  seconds: 10
+buffer_time:
+  minutes: 10
+alert_time_limit:
+  minutes: 10
+max_scrolling_count: 5

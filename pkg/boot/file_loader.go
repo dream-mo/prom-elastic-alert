@@ -3,6 +3,10 @@ package boot
 import (
 	"errors"
 	"fmt"
+	"os"
+	BuiltPath "path"
+	"strings"
+
 	"github.com/creasty/defaults"
 	"github.com/dream-mo/prom-elastic-alert/conf"
 	"github.com/dream-mo/prom-elastic-alert/utils"
@@ -11,13 +15,11 @@ import (
 	jsonYaml "github.com/ghodss/yaml"
 	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v2"
-	"os"
-	BuiltPath "path"
-	"strings"
 )
 
 const (
-	RuleFileSuffix = ".rule.yaml"
+	//RuleFileSuffix = ".rule.yaml"
+	RuleFileSuffix = ".yaml"
 )
 
 type FileLoader struct {
@@ -105,7 +107,7 @@ func (fl *FileLoader) ReloadSchedulerJob(engine *ElasticAlert) {
 		go fl.handleFileChange(rule.FilePath, engine)
 		return true
 	})
-	for fDir, _ := range fl.fsWatcherDirs {
+	for fDir := range fl.fsWatcherDirs {
 		go fl.handleDirChange(fDir, engine)
 	}
 }

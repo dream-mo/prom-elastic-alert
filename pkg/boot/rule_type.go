@@ -1,9 +1,10 @@
 package boot
 
 import (
-	"github.com/dream-mo/prom-elastic-alert/conf"
 	"strings"
 	"time"
+
+	"github.com/dream-mo/prom-elastic-alert/conf"
 )
 
 type Match struct {

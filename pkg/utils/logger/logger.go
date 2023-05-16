@@ -1,8 +1,9 @@
 package logger
 
 import (
-	log "github.com/sirupsen/logrus"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var Logger *log.Logger

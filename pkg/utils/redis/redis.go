@@ -2,9 +2,10 @@ package redis
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/dream-mo/prom-elastic-alert/conf"
 	"github.com/go-redis/redis/v8"
-	"time"
 )
 
 const (

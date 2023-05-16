@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/dream-mo/prom-elastic-alert/conf"
-	"github.com/dream-mo/prom-elastic-alert/utils"
 	"html/template"
 	"strings"
 	"time"
+
+	"github.com/dream-mo/prom-elastic-alert/conf"
+	"github.com/dream-mo/prom-elastic-alert/utils"
 )
 
 type AlertState int

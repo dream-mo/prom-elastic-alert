@@ -3,11 +3,12 @@ package conf
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dream-mo/prom-elastic-alert/utils"
-	"github.com/dream-mo/prom-elastic-alert/utils/xtime"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dream-mo/prom-elastic-alert/utils"
+	"github.com/dream-mo/prom-elastic-alert/utils/xtime"
 )
 
 type Rule struct {
@@ -32,7 +33,8 @@ type Rule struct {
 
 func (rl *Rule) GetQueryStringDSL(from int, size int, start time.Time, end time.Time) string {
 	q := `
-{
+{   
+	"size": 0,
     "query":{
         "bool":{
             "must":[
@@ -71,6 +73,7 @@ func (rl *Rule) GetQueryStringDSL(from int, size int, start time.Time, end time.
 func (rl *Rule) GetQueryStringCountDSL(start time.Time, end time.Time) string {
 	q := `
 {
+	"size": 0,
     "query":{
         "bool":{
             "must":[
