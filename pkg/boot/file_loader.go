@@ -18,8 +18,7 @@ import (
 )
 
 const (
-	//RuleFileSuffix = ".rule.yaml"
-	RuleFileSuffix = ".yaml"
+	RuleFileSuffix = ".rule.yaml"
 )
 
 type FileLoader struct {

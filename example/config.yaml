@@ -5,9 +5,10 @@ loader:
   type: "FileLoader"
   config:
     rules_folder: "rules"
-    rules_folder_recursion: false
+    rules_folder_recursion: true
 alert:
   alertmanager:
+    enabled: false
     url: "http://alertmanager:9093/api/v2/alerts"
     basic_auth:
       username: ""

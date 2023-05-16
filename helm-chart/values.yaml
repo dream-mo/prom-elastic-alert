@@ -1,0 +1,123 @@
+# Default values for elastic-alert.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/openinsight-proj/elastic-alert
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "346f5fd21035e669dfb0060d33ac3d10236e9842"
+
+setUp:
+  exporter:
+    enabled: true
+    listen_addr: ":9003"
+  loader:
+    type: "FileLoader"
+    config:
+      rules_folder: "rules"
+      rules_folder_recursion: true
+  alert:
+    alertmanager:
+      #url: "http://localhost:9003/api/v2/alerts"
+      enabled: false
+      url: "http://localhost:9093/api/v2/alerts"
+      basic_auth:
+        username: ""
+        password: ""
+    generator:
+      base_url: "http://localhost:9003/alert/message"
+      expire:
+        days: 1
+  redis:
+    addr: "localhost"
+    port: 6379
+    password: ""
+    db: 0
+  run_every:
+    seconds: 10
+  buffer_time:
+    minutes: 10
+  alert_time_limit:
+    minutes: 30
+  max_scrolling_count: 5
+
+# if esAddress is not empty, esAddress will be used as global configuration.
+rules:
+  es:
+    address: "https://10.6.229.200:30660"
+    username: "elastic"
+    password: "5xLLsmac4Q3815sp237P"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 9003
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

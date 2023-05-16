@@ -1,31 +1,32 @@
 version: "3"
 services:
-#  prom-elastic-alert:
-#    build:
-#      context: ../
-#    restart: always
-#    depends_on:
-#      - alertmanager
-#    expose:
-#      - 9003
-#    ports:
-#      - "9003:9003"
-#    volumes:
-#      - ../:/app/
-#      - ../config-dev.yaml:/app/config.yaml
-#    command: ["--debug"]
-#    deploy:
-#      resources:
-#        limits:
-#          cpus: '2'
-#          memory: 2000M
-#    healthcheck:
-#      test: [ "CMD-SHELL", "ps aux | grep 'main.go' | grep -v 'grep' || exit 1" ]
-#      interval: 10s
-#      timeout: 10s
-#      retries: 3
-#    networks:
-#      - prom-elastic-alert-net
+  prom-elastic-alert:
+    build:
+      context: ../
+#    image: elastic-alert:latest
+    restart: always
+    depends_on:
+      - alertmanager
+    expose:
+      - 9003
+    ports:
+      - "9003:9003"
+    volumes:
+      - ./config.yaml:/etc/config.yaml
+      - ../rules:/rules/demo
+    command: ["--config=/etc/config.yaml", "--debug"]
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2000M
+    healthcheck:
+      test: [ "CMD-SHELL", "ps aux | grep 'main.go' | grep -v 'grep' || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    networks:
+      - prom-elastic-alert-net
   alertmanager:
     image: prom/alertmanager:v0.23.0
     user: root

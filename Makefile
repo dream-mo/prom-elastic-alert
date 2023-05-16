@@ -8,6 +8,10 @@ build:
 elastic-alert-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=$(TARGETARCH) GOPROXY=$(GOPROXY) make build
 
+.PHONY: elastic-alert-darwin
+elastic-alert-darwin:
+	CGO_ENABLED=0 GOOS=darwin GOARCH=$(TARGETARCH) GOPROXY=$(GOPROXY) make build
+
 .PHONY: build-elastic-alert-docker
 build-elastic-alert-docker-multiarch:
 	export DOCKER_CLI_EXPERIMENTAL=enabled ;\

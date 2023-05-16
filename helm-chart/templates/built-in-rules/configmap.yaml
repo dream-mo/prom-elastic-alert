@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "elastic-alert.fullname" . }}-built-in-rules
+  labels:
+    {{- include "elastic-alert.labels" . | nindent 4 }}
+data:
+  insight-error-log-demo.rule.yaml: |-
+    unique_id: "InsightErrorLog"
+    enabled: true
+    es:
+  {{- if .Values.rules.es.address }}
+      addresses:
+        - "{{ .Values.rules.es.address }}"
+      username: "{{ .Values.rules.es.username }}"
+      password: "{{ .Values.rules.es.password }}"
+  {{- else }}
+      addresses:
+        - "https://10.6.229.200:30660"
+      username: "elastic"
+      password: "5xLLsmac4Q3815sp237P"
+  {{- end }}
+      conn_timeout: 300
+      version: "v7"
+    index: "insight-es-k8s-logs-*"
+    run_every:
+      seconds: 5
+    query:
+      type: "frequency"
+      query_string: 'log:error'
+      config:
+        timeframe:
+          minutes: 5
+        num_events: 5
+      labels:
+        alertname: "NginxErrorLog"
+        instance: "localhost"
+        severity: "warning"
+        for_time: "5min"
+        threshold: "5"
+      annotations:
+        description: "insight event error日志条数 {{ .value }} > {{ .threshold }}"
+        summary: "insight"
