@@ -32,3 +32,9 @@ func MD5(raw string) string {
 	bs := md5.Sum([]byte(raw))
 	return fmt.Sprintf("%x", bs)
 }
+
+// ESIdsLenLimit: VM label length limit is 16384 bytes.
+// So, we limit 30 * 512 bytes(elasticsearch _doc id lenth limit) = 15360.
+func ESIdsLenLimit(ids []string) []string {
+	return ids[:30]
+}

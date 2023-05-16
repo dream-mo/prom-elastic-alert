@@ -5,10 +5,12 @@ loader:
   type: "FileLoader"
   config:
     rules_folder: "rules"
-    rules_folder_recursion: false
+    rules_folder_recursion: true
 alert:
   alertmanager:
-    url: "http://alertmanager:9093/api/v2/alerts"
+    #url: "http://localhost:9003/api/v2/alerts"
+    enabled: false
+    url: "http://localhost:9093/api/v2/alerts"
     basic_auth:
       username: ""
       password: ""
@@ -26,5 +28,5 @@ run_every:
 buffer_time:
   minutes: 10
 alert_time_limit:
-  minutes: 10
+  minutes: 30
 max_scrolling_count: 5

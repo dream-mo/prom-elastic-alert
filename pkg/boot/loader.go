@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/creasty/defaults"
-	"github.com/dream-mo/prom-elastic-alert/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/conf"
 )
 
 type Loader interface {

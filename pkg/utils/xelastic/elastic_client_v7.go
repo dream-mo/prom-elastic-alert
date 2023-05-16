@@ -8,9 +8,9 @@ import (
 	"io"
 	"strings"
 
-	"github.com/dream-mo/prom-elastic-alert/utils/logger"
 	elasticsearch7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
 )
 
 type ElasticClientV7 struct {

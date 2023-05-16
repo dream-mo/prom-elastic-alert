@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/creasty/defaults"
-	"github.com/dream-mo/prom-elastic-alert/utils"
-	"github.com/dream-mo/prom-elastic-alert/utils/xtime"
 	jsonYaml "github.com/ghodss/yaml"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/xtime"
 	log "github.com/sirupsen/logrus"
 	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v2"
@@ -35,6 +35,7 @@ type AppConfig struct {
 	} `yaml:"loader"`
 	Alert struct {
 		Alertmanager struct {
+			Enabled   bool   `yaml:"enabled" default:"false"`
 			Url       string `yaml:"url"`
 			BasicAuth struct {
 				Username string `yaml:"username"`
@@ -69,7 +70,6 @@ type FlagOption struct {
 	Verbose    string `short:"v" long:"verbose" description:"log level: debug、info、warn、error" default:"info"`
 	Rule       string `long:"rule" description:"will only run the given single rule. The rule file may be a complete file path"`
 	Zone       string `long:"zone" description:"time zone, e.g like PRC、UTC" default:"PRC"`
-	//Mode       string `short:"m" long:"mode" description:"log content based mode or logs to metrics mode" default:"metrics"`
 }
 
 // GetLogLevel can get application log level

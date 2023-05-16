@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dream-mo/prom-elastic-alert/utils"
-	"github.com/dream-mo/prom-elastic-alert/utils/xtime"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/xtime"
 )
 
 type Rule struct {
@@ -33,8 +33,7 @@ type Rule struct {
 
 func (rl *Rule) GetQueryStringDSL(from int, size int, start time.Time, end time.Time) string {
 	q := `
-{   
-	"size": 0,
+{
     "query":{
         "bool":{
             "must":[
@@ -73,7 +72,6 @@ func (rl *Rule) GetQueryStringDSL(from int, size int, start time.Time, end time.
 func (rl *Rule) GetQueryStringCountDSL(start time.Time, end time.Time) string {
 	q := `
 {
-	"size": 0,
     "query":{
         "bool":{
             "must":[
@@ -115,6 +113,11 @@ func (rl *Rule) GetEsAddress() string {
 
 func GetMetricsOpRedisFingerprint(uniqueId string, path string, cmd string, key string, statusCode int) string {
 	f := []string{uniqueId, path, cmd, key, strconv.Itoa(statusCode)}
+	return utils.MD5(strings.Join(f, ""))
+}
+
+func GetMetricsAlertFingerprint(uniqueId string, path string, key string) string {
+	f := []string{uniqueId, path, key}
 	return utils.MD5(strings.Join(f, ""))
 }
 
@@ -162,7 +165,7 @@ properties:
     type: object
     required: []
     properties:
-      alertmanager: {type: object, required: [], properties: {url: {type: string}, basic_auth: {type: object, required: [], properties: {username: {type: string}, password: {type: string}}}}}
+      alertmanager: {enabled: {type: boolean}, type: object, required: [], properties: {url: {type: string}, basic_auth: {type: object, required: [], properties: {username: {type: string}, password: {type: string}}}}}
       generator: {type: object, required: [], properties: {base_url: {type: string}, expire: {type: object, required: [], properties: {days: {type: number}}}}}
   redis:
     type: object

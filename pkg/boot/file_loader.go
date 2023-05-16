@@ -8,11 +8,11 @@ import (
 	"strings"
 
 	"github.com/creasty/defaults"
-	"github.com/dream-mo/prom-elastic-alert/conf"
-	"github.com/dream-mo/prom-elastic-alert/utils"
-	"github.com/dream-mo/prom-elastic-alert/utils/logger"
 	"github.com/fsnotify/fsnotify"
 	jsonYaml "github.com/ghodss/yaml"
+	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
 	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v2"
 )

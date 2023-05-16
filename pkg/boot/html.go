@@ -5,10 +5,10 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/dream-mo/prom-elastic-alert/conf"
-	redisx "github.com/dream-mo/prom-elastic-alert/utils/redis"
-	"github.com/dream-mo/prom-elastic-alert/utils/xelastic"
-	"github.com/dream-mo/prom-elastic-alert/utils/xtime"
+	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	redisx "github.com/openinsight-proj/elastic-alert/pkg/utils/redis"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/xelastic"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/xtime"
 )
 
 func RenderAlertMessage(writer http.ResponseWriter, request *http.Request) {

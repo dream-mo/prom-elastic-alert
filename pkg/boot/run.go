@@ -5,20 +5,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils"
 	"math"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/creasty/defaults"
-	"github.com/dream-mo/prom-elastic-alert/conf"
-	"github.com/dream-mo/prom-elastic-alert/utils/alertmanager"
-	"github.com/dream-mo/prom-elastic-alert/utils/logger"
-	redisx "github.com/dream-mo/prom-elastic-alert/utils/redis"
-	"github.com/dream-mo/prom-elastic-alert/utils/xelastic"
-	"github.com/dream-mo/prom-elastic-alert/utils/xtime"
 	"github.com/go-co-op/gocron"
 	"github.com/go-redis/redis/v8"
+	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/alertmanager"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
+	redisx "github.com/openinsight-proj/elastic-alert/pkg/utils/redis"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/xelastic"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/xtime"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -28,8 +30,8 @@ var (
 
 const (
 	innerSendAlertJobId = "__send_alert__"
-	namespace           = "prom_elastic_alert"
-	Version             = "1.0.0"
+	namespace           = "elastic_alert"
+	Version             = "1.1.0"
 )
 
 type ElasticAlert struct {
@@ -55,15 +57,17 @@ func (ea *ElasticAlert) Start() {
 	ea.loader = loader
 	config := ea.appConf.Loader.Config
 	loader.InjectConfig(config)
-	logger.Logger.Infoln("Rules loading...")
+	logger.Logger.Infoln("rules loading...")
 	rules := ea.loader.GetRules()
 	for _, rule := range rules {
 		go ea.startJobScheduler(rule)
 	}
 
-	// Publish alert to redis task
 	sendAlertScheduler := gocron.NewScheduler(xtime.Zone).SingletonMode()
-	sendAlertScheduler.Every(ea.appConf.RunEvery.GetSeconds()).Second().Do(ea.pushAlert)
+	_, err := sendAlertScheduler.Every(ea.appConf.RunEvery.GetSeconds()).Second().Do(ea.pushAlert)
+	if err != nil {
+		return
+	}
 	sendAlertScheduler.StartAsync()
 	job := ElasticJob{
 		Scheduler: sendAlertScheduler,
@@ -75,8 +79,10 @@ func (ea *ElasticAlert) Start() {
 	loader.ReloadSchedulerJob(ea)
 	logger.Logger.Infoln("Start up")
 
-	// Consume redis alert list task
-	go ea.popAlert()
+	// If alertmanager enabled, then alertmsg will be pushed to redis and consume redis alert list task
+	if ea.appConf.Alert.Alertmanager.Enabled {
+		go ea.popAlert()
+	}
 }
 
 func (ea *ElasticAlert) buildFQName(name string) string {
@@ -242,7 +248,7 @@ func (ea *ElasticAlert) runRuleQuery(r *conf.Rule) []any {
 	_ = json.Compact(dst, []byte(dsl))
 	count, statusCode := client.CountByDSL(r.Index, dsl)
 	go func() {
-		ea.addQueryMetrics(r, statusCode)
+		ea.addQueryStatusMetrics(r, statusCode)
 	}()
 	s := fmt.Sprintf("rules: %s index: %s dsl: %s hits_num: %d", r.FilePath, r.Index, dst.String(), count)
 	logger.Logger.Debugln(s)
@@ -263,7 +269,7 @@ func (ea *ElasticAlert) runRuleQuery(r *conf.Rule) []any {
 				from = (p - 1) * size
 				dsl := r.GetQueryStringDSL(from, size, start, end)
 				resultHits, _, code := client.FindByDSL(r.Index, dsl, []string{"@timestamp"})
-				ea.addQueryMetrics(r, code)
+				ea.addQueryStatusMetrics(r, code)
 				lock.Lock()
 				hits = append(hits, resultHits...)
 				lock.Unlock()
@@ -278,7 +284,7 @@ func (ea *ElasticAlert) runRuleQuery(r *conf.Rule) []any {
 	return hits
 }
 
-func (ea *ElasticAlert) addQueryMetrics(r *conf.Rule, statusCode int) {
+func (ea *ElasticAlert) addQueryStatusMetrics(r *conf.Rule, statusCode int) {
 	f := r.GetMetricsQueryFingerprint(statusCode)
 	v, _ := ea.metrics.Load(r.UniqueId)
 	eam := v.(*ElasticAlertPrometheusMetrics)
@@ -303,22 +309,24 @@ func (ea *ElasticAlert) addQueryMetrics(r *conf.Rule, statusCode int) {
 func (ea *ElasticAlert) addOpRedisMetrics(uniqueId string, path string, cmd string, key string, status int) {
 	f := conf.GetMetricsOpRedisFingerprint(uniqueId, path, cmd, key, status)
 	v, _ := ea.metrics.Load(uniqueId)
-	eam := v.(*ElasticAlertPrometheusMetrics)
-	metricsVal, ok := eam.OpRedis.Load(f)
-	if ok {
-		metric := metricsVal.(OpRedisMetrics)
-		metricCopy := metric
-		atomic.AddInt64(&metricCopy.Value, 1)
-		eam.OpRedis.Store(f, metricCopy)
-	} else {
-		eam.OpRedis.Store(f, OpRedisMetrics{
-			UniqueId: uniqueId,
-			Path:     path,
-			Cmd:      cmd,
-			Key:      key,
-			Status:   status,
-			Value:    1,
-		})
+	if v != nil {
+		eam := v.(*ElasticAlertPrometheusMetrics)
+		metricsVal, ok := eam.OpRedis.Load(f)
+		if ok {
+			metric := metricsVal.(OpRedisMetrics)
+			metricCopy := metric
+			atomic.AddInt64(&metricCopy.Value, 1)
+			eam.OpRedis.Store(f, metricCopy)
+		} else {
+			eam.OpRedis.Store(f, OpRedisMetrics{
+				UniqueId: uniqueId,
+				Path:     path,
+				Cmd:      cmd,
+				Key:      key,
+				Status:   status,
+				Value:    1,
+			})
+		}
 	}
 }
 
@@ -342,28 +350,52 @@ func (ea *ElasticAlert) addWebhookNotifyMetrics(uniqueId string, path string, st
 	}
 }
 
+// generate elastic alert metrics,
+func (ea *ElasticAlert) addAlertMetrics(uniqueId string, path string, key string, sampleMsg AlertSampleMessage) {
+	f := conf.GetMetricsAlertFingerprint(uniqueId, path, key)
+	v, _ := ea.metrics.Load(uniqueId)
+	if v != nil {
+		eam := v.(*ElasticAlertPrometheusMetrics)
+		metricsVal, ok := eam.ElasticAlert.Load(f)
+		ids := strings.Join(utils.ESIdsLenLimit(sampleMsg.Ids), "|")
+		if ok {
+			// update metrics
+			metric := metricsVal.(ElasticAlertMetrics)
+			metricCopy := metric
+			atomic.AddInt64(&metricCopy.Value, 1)
+			metricCopy.Ids = ids
+			eam.ElasticAlert.Store(f, metricCopy)
+		} else {
+			// create new
+			eam.ElasticAlert.Store(f, ElasticAlertMetrics{
+				UniqueId: uniqueId,
+				//Path:      path,
+				Key:   key,
+				Value: 1,
+				//EsAddress: strings.Join(sampleMsg.ES.Addresses, ","),
+				Index: sampleMsg.Index,
+				Ids:   ids,
+			})
+		}
+	}
+}
+
 func (ea *ElasticAlert) pushAlert() {
 	ea.alerts.Range(func(key, value any) bool {
 		ruleUniqueId := key.(string)
 		alert := value.(AlertContent)
-		redisKey := alert.getUrlHashKey()
 		msg := AlertSampleMessage{
 			ES:    alert.Rule.ES,
 			Index: alert.Rule.Index,
 			Ids:   alert.Match.Ids,
 		}
-		bs, _ := json.Marshal(msg)
-		redisx.Client.Set(ctx, redisKey, string(bs), ea.appConf.Alert.Generator.Expire.GetTimeDuration()).Result()
-		url := ea.appConf.Alert.Generator.BaseUrl + "?key=" + redisKey
-		message := alert.GetAlertMessage(url)
-		res := redisx.Client.LPush(ctx, redisx.AlertQueueListKey, message)
-		if e := res.Err(); e != nil {
-			go ea.addOpRedisMetrics(alert.Rule.UniqueId, alert.Rule.FilePath, "lpush", redisx.AlertQueueListKey, 0)
-			t := fmt.Sprintf("pushAlert redis lpush error: %s", e.Error())
-			logger.Logger.Errorln(t)
-		} else {
-			go ea.addOpRedisMetrics(alert.Rule.UniqueId, alert.Rule.FilePath, "lpush", redisx.AlertQueueListKey, 1)
+
+		if ea.appConf.Alert.Alertmanager.Enabled {
+			ea.pushToRedis(alert, msg)
 		}
+
+		go ea.addAlertMetrics(alert.Rule.UniqueId, alert.Rule.FilePath, redisx.AlertQueueListKey, msg)
+
 		if alert.HasResolved() {
 			ea.alerts.Delete(ruleUniqueId)
 		}
@@ -371,6 +403,30 @@ func (ea *ElasticAlert) pushAlert() {
 	})
 }
 
+// push alert content to redis
+func (ea *ElasticAlert) pushToRedis(alertContent AlertContent, sampleMsg AlertSampleMessage) {
+	redisKey := alertContent.getUrlHashKey()
+	bs, _ := json.Marshal(sampleMsg)
+
+	result, err := redisx.Client.Set(ctx, redisKey, string(bs), ea.appConf.Alert.Generator.Expire.GetTimeDuration()).Result()
+	if err != nil {
+		logger.Logger.Errorf("push to redis error: %s", err.Error())
+	}
+	logger.Logger.Debugf("push alert content success: %s", result)
+
+	url := ea.appConf.Alert.Generator.BaseUrl + "?key=" + redisKey
+	message := alertContent.GetAlertMessage(url)
+	res := redisx.Client.LPush(ctx, redisx.AlertQueueListKey, message)
+	if e := res.Err(); e != nil {
+		go ea.addOpRedisMetrics(alertContent.Rule.UniqueId, alertContent.Rule.FilePath, "lpush", redisx.AlertQueueListKey, 0)
+		t := fmt.Sprintf("pushAlert redis lpush error: %s", e.Error())
+		logger.Logger.Errorln(t)
+	} else {
+		go ea.addOpRedisMetrics(alertContent.Rule.UniqueId, alertContent.Rule.FilePath, "lpush", redisx.AlertQueueListKey, 1)
+	}
+}
+
+// consume alert content from redis
 func (ea *ElasticAlert) popAlert() {
 	for {
 		val, err := redisx.Client.BRPop(ctx, time.Second*5, redisx.AlertQueueListKey).Result()

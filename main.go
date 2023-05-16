@@ -2,19 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/dream-mo/prom-elastic-alert/boot"
-	"github.com/dream-mo/prom-elastic-alert/conf"
-	"github.com/dream-mo/prom-elastic-alert/utils/logger"
-	"github.com/dream-mo/prom-elastic-alert/utils/redis"
-	"github.com/dream-mo/prom-elastic-alert/utils/xtime"
-	"github.com/jessevdk/go-flags"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"os"
 	"os/signal"
 	"runtime/debug"
 	"syscall"
+
+	"github.com/jessevdk/go-flags"
+	"github.com/openinsight-proj/elastic-alert/pkg/boot"
+	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/redis"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/xtime"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -40,7 +41,12 @@ func main() {
 	xtime.FixedZone(opts.Zone)
 
 	c := conf.GetAppConfig(opts.ConfigPath)
-	redis.Setup()
+
+	// only set up redis when alertmanager enabled.
+	if conf.AppConf.Alert.Alertmanager.Enabled {
+		redis.Setup()
+	}
+
 	ea := boot.NewElasticAlert(c, &opts)
 	ea.Start()
 

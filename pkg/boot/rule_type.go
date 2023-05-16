@@ -1,10 +1,11 @@
 package boot
 
 import (
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/xtime"
 	"strings"
 	"time"
 
-	"github.com/dream-mo/prom-elastic-alert/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/conf"
 )
 
 type Match struct {
@@ -47,7 +48,7 @@ func (fr *FrequencyRule) GetMatches(r *conf.Rule, resultHits []any) []Match {
 		_id := m["_id"].(string)
 		_source := m["_source"].(map[string]any)
 		timestamp := _source["@timestamp"].(string)
-		ts, _ := time.Parse(time.RFC3339, timestamp)
+		ts := xtime.Parse(timestamp)
 		match.HitsNumber = len(resultHits)
 		if !hasAgg {
 			match.StartsAt = ts

@@ -17,7 +17,7 @@ alert:
     expire:
       days: 1
 redis:
-  addr: "docker.for.mac.host.internal"
+  addr: "redis"
   port: 6379
   password: ""
   db: 0

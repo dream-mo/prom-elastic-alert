@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dream-mo/prom-elastic-alert/utils/logger"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
 )
 
 const (
@@ -42,7 +42,7 @@ func HttpSendAlert(url string, username string, password string, payload string)
 			return false, 499
 		}
 	} else {
-		t := fmt.Sprintf("status:%d payload:%s", resp.StatusCode, payload)
+		t := fmt.Sprintf("status: %d payload:%s", resp.StatusCode, payload)
 		logger.Logger.Debugln(t)
 		return true, resp.StatusCode
 	}

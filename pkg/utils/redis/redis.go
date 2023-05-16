@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dream-mo/prom-elastic-alert/conf"
 	"github.com/go-redis/redis/v8"
+	"github.com/openinsight-proj/elastic-alert/pkg/conf"
 )
 
 const (

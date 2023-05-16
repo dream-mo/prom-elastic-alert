@@ -1,55 +1,52 @@
-English | 中文
+English | [中文](./README_ZH.md)
 
-prom-elastic-alert是一个基于查询Elasticsearch的告警组件. 
+elastic-alert is an alerting component based on querying Elasticsearch.
 
-如有帮助给个Star⭐鼓励一下~️
+## Motivation
 
-## 简介
+This project [elastic-alert](https://github.com/openinsight-proj/elastic-alert) mainly solves there are no more independent log alerting open source components to choose from in the  Elastic stack market.
 
-本项目[prom-elastic-alert](https://github.com/dream-mo/prom-elastic-alert)主要是解决Elastic栈中, ELK告警市面上没有更多的日志告警开源组件可供选择.虽然之前有使用过[Elastalert](https://github.com/Yelp/elastalert)项目,
-但是该项目已经不维护,并且我们在实际使用的过程中遇到了一些问题:
+Although we have used the [Elastalert](https://github.com/Yelp/elastalert) project before, but this project is no longer maintained, and we encountered some problems during actual use:
+- Elastalert are written in Python, and poor performance sometimes causes alarm delays
+- Elastalert's alarm convergence, alarm aggregation, convergence and other functions are weak
+- Elastalert operation data cannot be integrated into the Prometheus monitoring system
 
-- 1.组件使用Python编写,性能较差有时候造成告警延迟
-- 2.告警收敛、告警聚合、收敛等功能较弱
-- 3.组件运行数据不能对接Prometheus监控体系
+This project was inspired by [Elastalert](https://github.com/Yelp/elastalert)
 
-本项目灵感来自于[Elastalert](https://github.com/Yelp/elastalert)
+## Features and benefits
 
-## 特性及优点
+- Written in Golang, cross-platform, small size, performance is advantageous enough
+- A complete API is provided
+- It does not realize alarm aggregation, convergence, grouping, etc., which is the advantage of alertmanager, and there is no need to impl those by yourself. Introduced [PrometheusAlert](https://github.com/feiyu563/PrometheusAlert) to implement multiple types of alerts
+- Built-in exporter, you can access the Prometheus monitoring system to view the current component running status, data, etc
+- Support for Elasticsearch7, Elasticsearch8(In the Future)
+- Built-in Grafana panel JSON files
 
-- 1.使用Golang编写,跨平台、体积小、性能有足够的优势
-- 2.自身不实现告警聚合、收敛、分组等,这是alertmanager的优势所在,没必要自己再造轮子.引入[PrometheusAlert](https://github.com/feiyu563/PrometheusAlert)实现多类型告警
-- 3.内置exporter,可以接入Prometheus监控体系,查看当前组件运行状态、数据等
-- 4.支持Elasticsearch7、Elasticsearch8
-- 5.提供现成的Grafana面板json文件
+## Architecture diagram
 
-## 架构图
+![Architecture](docs/img/architecture.png)
 
-![架构图](docs/img/architecture.png)
+## Sample alarm
 
-## 告警样例
+### DingTalk notifications
 
-### 钉钉通知
+![DingTalk](docs/img/alert.png)
 
-![钉钉告警图](docs/img/alert.png)
+### Alert details
 
-### 告警详情
+![details](docs/img/detail.png)
 
-![告警详情图](docs/img/detail.png)
+### Grafana panel
 
-### Grafana面板
+![Grafanapanel](docs/img/grafana.png)
 
-![Grafana面板图](docs/img/grafana.png)
+### Quick Start
 
-### 安装与使用
+[Docker Compose](./CONTRIBUTING.md)
 
-- 1.下载[release](https://github.com/dream-mo/prom-elastic-alert/releases)二进制文件,拷贝config.yaml,运行即可
-- 2.进入compose目录,使用docker-compose运行([example](https://github.com/dream-mo/prom-elastic-alert/tree/main/example))
-- 3.自行编译, git clone 项目到本地, 之后go build即可
+### Docs
 
-### 文档
-
-详细文档:  [使用文档](docs/document.md)
+more docs [Usage](docs/document.md)
 
 ### License
 

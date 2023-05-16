@@ -4,9 +4,9 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"github.com/dream-mo/prom-elastic-alert/conf"
-	"github.com/dream-mo/prom-elastic-alert/utils/logger"
 	elasticsearch7 "github.com/elastic/go-elasticsearch/v7"
+	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
 )
 
 type ElasticClient interface {

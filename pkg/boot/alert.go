@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dream-mo/prom-elastic-alert/conf"
-	"github.com/dream-mo/prom-elastic-alert/utils"
+	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils"
 )
 
 type AlertState int
