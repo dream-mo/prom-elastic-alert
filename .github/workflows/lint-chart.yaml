@@ -1,6 +1,9 @@
 name: Lint Charts
 
 on:
+  push:
+    branches:
+      - 'main'
   pull_request:
     paths:
       - 'helm-chart/**'

@@ -26,7 +26,7 @@ jobs:
       - name: Release Helm Chart
         uses: helm/chart-releaser-action@v1.5.0
         with:
-          charts_dir: helm-chart
+          charts_dir: helm-chart/
         env:
           CR_TOKEN: "${{ secrets.ACTIONS_TOKEN }}"
 
