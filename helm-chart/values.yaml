@@ -8,7 +8,7 @@ image:
   repository: ghcr.io/openinsight-proj/elastic-alert
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "346f5fd21035e669dfb0060d33ac3d10236e9842"
+  tag: "633f1f001b75408abb57abbdb888ac96b1abd945"
 
 setUp:
   exporter:

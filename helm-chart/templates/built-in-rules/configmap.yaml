@@ -39,5 +39,5 @@ data:
         for_time: "5min"
         threshold: "5"
       annotations:
-        description: "insight event error日志条数 {{ .value }} > {{ .threshold }}"
+        description: "insight event error日志条数 {{ `{{ .value }}` }} > {{ `{{ .threshold }}` }}"
         summary: "insight"
