@@ -21,6 +21,7 @@ const (
 	RuleFileSuffix = ".rule.yaml"
 )
 
+// FileLoader TODO(jian): use https://github.com/spf13/viper instead.
 type FileLoader struct {
 	RulesFolder          string `default:"rules"`
 	RulesFolderRecursion bool   `default:"true"`
