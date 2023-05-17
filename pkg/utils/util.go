@@ -36,5 +36,9 @@ func MD5(raw string) string {
 // ESIdsLenLimit: VM label length limit is 16384 bytes.
 // So, we limit 30 * 512 bytes(elasticsearch _doc id lenth limit) = 15360.
 func ESIdsLenLimit(ids []string) []string {
-	return ids[:30]
+	if len(ids) <= 30 {
+		return ids
+	} else {
+		return ids[:30]
+	}
 }
