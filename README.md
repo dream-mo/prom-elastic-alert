@@ -1,6 +1,33 @@
-English | [中文](./README_ZH.md)
+# Elastic Alert
 
-elastic-alert is an alerting component based on querying Elasticsearch.
+<br />
+<p align="center">
+<!--   <a href="https://github.com/openinsight-proj/openinsight">
+    <img src="" alt="Logo" width="80" height="80">
+  </a> -->
+
+<h3 align="center">elastic-alert</h3>
+  <p align="center">
+    You know, elastic-alert is an alerting component
+    <br />
+    An alerting component based on querying Elasticsearch.
+    <br />
+    <strong>Explore the docs »</strong>
+    <a href="https://github.com/openinsight-proj/elastic-alert/blob/main/README_ZH.md">中文</a>
+    <br />
+    <br />
+    <a href="">Visit our blog</a>
+    ·
+    <a href="https://github.com/openinsight-proj/elastic-alert/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/openinsight-proj/elastic-alert/issues">Request Feature</a>
+  </p>
+</p>
+
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
 
 ## Motivation
 
@@ -51,3 +78,12 @@ more docs [Usage](docs/document.md)
 ### License
 
 prom-elastic-alert is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
+
+[contributors-shield]: https://img.shields.io/github/contributors/openinsight-proj/elastic-alert.svg?style=for-the-badge
+[contributors-url]: https://github.com/openinsight-proj/elastic-alert/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/openinsight-proj/elastic-alert.svg?style=for-the-badge
+[forks-url]: https://github.com/openinsight-proj/elastic-alert/network/members
+[stars-shield]: https://img.shields.io/github/stars/openinsight-proj/elastic-alert.svg?style=for-the-badge
+[stars-url]: https://github.com/openinsight-proj/elastic-alert/stargazers
+[issues-shield]: https://img.shields.io/github/issues/openinsight-proj/elastic-alert.svg?style=for-the-badge
+[issues-url]: https://github.com/openinsight-proj/elastic-alert/issues
