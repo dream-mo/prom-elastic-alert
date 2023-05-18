@@ -5,7 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/openinsight-proj/elastic-alert
+  registry: ghcr.io
+  repository: openinsight-proj/elastic-alert
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "633f1f001b75408abb57abbdb888ac96b1abd945"
@@ -46,10 +47,24 @@ setUp:
 
 # if esAddress is not empty, esAddress will be used as global configuration.
 rules:
+  builtIn:
+    # if true, helm chart will create a built-in rule.
+    create: false
   es:
-    address: "https://10.6.229.200:30660"
-    username: "elastic"
-    password: "5xLLsmac4Q3815sp237P"
+    address: ""
+    username: ""
+    password: ""
+
+extraVolumes: []
+#extraVolumes:
+#  - name: custom-rules-configmap
+#    configMap:
+#      name: custom-rules-config
+
+extraVolumeMounts: []
+#extraVolumeMounts:
+#  - name: custom-rules-configmap
+#    mountPath: /rules/custom-rules
 
 imagePullSecrets: []
 nameOverride: ""

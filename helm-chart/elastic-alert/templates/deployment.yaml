@@ -34,22 +34,32 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
+        {{- if .Values.rules.builtIn.create -}}
         - name: built-in-rules
           configMap:
             name: {{ include "elastic-alert.fullname" . }}-built-in-rules
             items:
+        {{- end }}
+        {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
             - name: setup
               mountPath: '/etc/config.yaml'
               subPath: config.yaml
+            {{- if .Values.rules.builtIn.create -}}
             - name: built-in-rules
               mountPath: /rules/built-in
+            {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 9003

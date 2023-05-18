@@ -1,3 +1,4 @@
+{{- if .Values.rules.builtIn.create -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,17 +10,10 @@ data:
     unique_id: "InsightErrorLog"
     enabled: true
     es:
-  {{- if .Values.rules.es.address }}
       addresses:
         - "{{ .Values.rules.es.address }}"
       username: "{{ .Values.rules.es.username }}"
       password: "{{ .Values.rules.es.password }}"
-  {{- else }}
-      addresses:
-        - "https://10.6.229.200:30660"
-      username: "elastic"
-      password: "5xLLsmac4Q3815sp237P"
-  {{- end }}
       conn_timeout: 300
       version: "v7"
     index: "insight-es-k8s-logs-*"
@@ -39,5 +33,6 @@ data:
         for_time: "5min"
         threshold: "5"
       annotations:
-        description: "insight event error日志条数 {{ `{{ .value }}` }} > {{ `{{ .threshold }}` }}"
-        summary: "insight"
+        description: "insight k8s log error 日志条数 {{ `{{ .value }}` }} > {{ `{{ .threshold }}` }}"
+        summary: "insight elastic alert"
+{{- end }}
