@@ -1,6 +1,33 @@
-[English](./README.md) | 中文
+# Elastic Alert
 
-elastic-alert 是一个基于查询 Elasticsearch 的告警组件.
+<br />
+<p align="center">
+<!--   <a href="https://github.com/openinsight-proj/openinsight">
+    <img src="" alt="Logo" width="80" height="80">
+  </a> -->
+
+<h3 align="center">elastic-alert</h3>
+  <p align="center">
+    你懂的，elastic-alert 是一个基于查询 Elasticsearch 的告警组件.
+    <br />
+    一个基于查询 Elasticsearch 的告警组件.
+    <br />
+    <strong>查看文档 »</strong>
+    <a href="https://github.com/openinsight-proj/elastic-alert/blob/main/README.md">English</a>
+    <br />
+    <br />
+    <a href="">博客</a>
+    ·
+    <a href="https://github.com/openinsight-proj/elastic-alert/issues">提交 Bug</a>
+    ·
+    <a href="https://github.com/openinsight-proj/elastic-alert/issues">申请 Feature</a>
+  </p>
+</p>
+
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
 
 ## 简介
 
@@ -53,3 +80,13 @@ elastic-alert 是一个基于查询 Elasticsearch 的告警组件.
 ### 开源许可
 
 遵循 Apache 2.0 协议，详细请查看 [LICENSE](LICENSE)
+
+
+[contributors-shield]: https://img.shields.io/github/contributors/openinsight-proj/elastic-alert.svg?style=for-the-badge
+[contributors-url]: https://github.com/openinsight-proj/elastic-alert/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/openinsight-proj/elastic-alert.svg?style=for-the-badge
+[forks-url]: https://github.com/openinsight-proj/elastic-alert/network/members
+[stars-shield]: https://img.shields.io/github/stars/openinsight-proj/elastic-alert.svg?style=for-the-badge
+[stars-url]: https://github.com/openinsight-proj/elastic-alert/stargazers
+[issues-shield]: https://img.shields.io/github/issues/openinsight-proj/elastic-alert.svg?style=for-the-badge
+[issues-url]: https://github.com/openinsight-proj/elastic-alert/issues
