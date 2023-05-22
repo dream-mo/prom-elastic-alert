@@ -1,0 +1,19 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    {{- toYaml .Values.serviceMonitor.additionalLabels | nindent 4 }}
+  name: {{ .Release.Name }}-elastic-alert
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpoints:
+    - honorLabels: true
+      port: http
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+    {{- include "elastic-alert.selectorLabels" . | nindent 6 }}
+{{- end -}}
