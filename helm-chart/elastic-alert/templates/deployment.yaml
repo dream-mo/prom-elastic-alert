@@ -34,11 +34,10 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
-        {{- if .Values.rules.builtIn.create -}}
+        {{- if .Values.rules.builtIn.create }}
         - name: built-in-rules
           configMap:
             name: {{ include "elastic-alert.fullname" . }}-built-in-rules
-            items:
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
@@ -53,7 +52,7 @@ spec:
             - name: setup
               mountPath: '/etc/config.yaml'
               subPath: config.yaml
-            {{- if .Values.rules.builtIn.create -}}
+            {{- if .Values.rules.builtIn.create }}
             - name: built-in-rules
               mountPath: /rules/built-in
             {{- end }}
