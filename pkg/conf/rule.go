@@ -159,7 +159,7 @@ properties:
     type: object
     required: []
     properties:
-      type: {type: string, enum: ["FileLoader"]}
+      type: {type: string, enum: ["FileLoader", "FileWatcherLoader"]}
       config: {type: object, required: [], properties: {rules_folder: {type: string}, rules_folder_recursion: {type: boolean}}}
   alert:
     type: object

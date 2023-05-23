@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/openinsight-proj/elastic-alert/pkg/server"
 	"net/http"
 	"os"
 	"os/signal"
@@ -49,6 +50,13 @@ func main() {
 
 	ea := boot.NewElasticAlert(c, &opts)
 	ea.Start()
+
+	//init http server
+	s := server.HttpServer{
+		ServerConfig: c,
+		Ea:           ea,
+	}
+	go s.InitHttpServer()
 
 	if c.Exporter.Enabled {
 		metrics := boot.NewRuleStatusCollector(ea)

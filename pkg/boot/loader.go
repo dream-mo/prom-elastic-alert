@@ -33,6 +33,7 @@ func NewLoaderInstance(t string) Loader {
 
 func init() {
 	maps = map[string]reflect.Type{
-		"FileLoader": reflect.TypeOf(FileLoader{}),
+		"FileLoader":        reflect.TypeOf(FileLoader{}),
+		"FileWatcherLoader": reflect.TypeOf(FileWatcherLoader{}),
 	}
 }

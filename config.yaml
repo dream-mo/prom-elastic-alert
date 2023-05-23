@@ -1,14 +1,21 @@
+server:
+  enabled: true
+  listen_addr: ":8080"
+
 exporter:
   enabled: true
   listen_addr: ":9003"
+
 loader:
   type: "FileLoader"
   config:
     rules_folder: "rules"
-    rules_folder_recursion: false
+    rules_folder_recursion: true
 alert:
   alertmanager:
-    url: "http://alertmanager:9093/api/v2/alerts"
+    #url: "http://localhost:9003/api/v2/alerts"
+    enabled: false
+    url: "http://localhost:9093/api/v2/alerts"
     basic_auth:
       username: ""
       password: ""
@@ -17,7 +24,7 @@ alert:
     expire:
       days: 1
 redis:
-  addr: "redis"
+  addr: "localhost"
   port: 6379
   password: ""
   db: 0

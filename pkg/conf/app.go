@@ -23,8 +23,19 @@ type EsConfig struct {
 	Version     string   `yaml:"version" default:"v7"`
 }
 
+type Datasource struct {
+	Type   string         `yaml:"type" default:"file"`
+	Config map[string]any `yaml:"config"`
+}
+
 // AppConfig is application global configure
 type AppConfig struct {
+	Server struct {
+		ListenAddr string     `yaml:"listen_addr" default:":8080"`
+		Enabled    bool       `yaml:"enabled" default:"true"`
+		DB         Datasource `yaml:"datasource"`
+	} `yaml:"server"`
+
 	Exporter struct {
 		ListenAddr string `yaml:"listen_addr" default:":9003"`
 		Enabled    bool   `yaml:"enabled" default:"true"`

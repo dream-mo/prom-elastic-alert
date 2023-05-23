@@ -37,7 +37,7 @@ const (
 type ElasticAlert struct {
 	appConf    *conf.AppConfig
 	opts       *conf.FlagOption
-	loader     Loader
+	Loader     Loader
 	rules      sync.Map // map[string]*conf.Rule
 	metrics    sync.Map // map[string]*ElasticAlertPrometheusMetrics
 	schedulers sync.Map // map[string]ElasticJob
@@ -51,14 +51,13 @@ type ElasticJob struct {
 }
 
 func (ea *ElasticAlert) Start() {
-
-	// Bootstrap loader
+	// Bootstrap Loader
 	loader := NewLoaderInstance(ea.appConf.Loader.Type)
-	ea.loader = loader
+	ea.Loader = loader
 	config := ea.appConf.Loader.Config
 	loader.InjectConfig(config)
 	logger.Logger.Infoln("rules loading...")
-	rules := ea.loader.GetRules()
+	rules := ea.Loader.GetRules()
 	for _, rule := range rules {
 		go ea.startJobScheduler(rule)
 	}

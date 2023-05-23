@@ -7,7 +7,15 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: 9003
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+    - port: 8081
+      targetPort: reloader-web
+      protocol: TCP
+      name: reloader-web
+    - port: 8080
       targetPort: http
       protocol: TCP
       name: http

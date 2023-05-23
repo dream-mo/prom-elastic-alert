@@ -43,6 +43,29 @@ spec:
         {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- end }}
       containers:
+        - name: init-config-reloader
+          image: "{{ .Values.configReloader.image.registry }}/{{ .Values.configReloader.image.repository }}:{{ .Values.configReloader.image.tag }}"
+          command:
+            - /bin/prometheus-config-reloader
+          args:
+            - '--watch-interval=5s'
+            - '--listen-address=:8081'
+            - '--watched-dir=/rules' # non-recursively: https://github.com/prometheus-operator/prometheus-operator/blob/70e9708371a6dbdad716deab4fc6fc9a2d89ed1b/cmd/prometheus-config-reloader/main.go#LL65C2-L65C12
+            - '--reload-url=http://127.0.0.1:8080/-/reload'
+          ports:
+            - name: reloader-web
+              containerPort: 8081
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.configReloader.resources | nindent 12 }}
+          volumeMounts:
+            {{- if .Values.rules.builtIn.create }}
+            - name: built-in-rules
+              mountPath: /rules
+            {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -60,8 +83,11 @@ spec:
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}
           ports:
-            - name: http
+            - name: metrics
               containerPort: 9003
+              protocol: TCP
+            - name: http
+              containerPort: 8080
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

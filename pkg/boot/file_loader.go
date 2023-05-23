@@ -4,11 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	BuiltPath "path"
 	"strings"
 
 	"github.com/creasty/defaults"
-	"github.com/fsnotify/fsnotify"
 	jsonYaml "github.com/ghodss/yaml"
 	"github.com/openinsight-proj/elastic-alert/pkg/conf"
 	"github.com/openinsight-proj/elastic-alert/pkg/utils"
@@ -21,11 +19,10 @@ const (
 	RuleFileSuffix = ".rule.yaml"
 )
 
-// FileLoader TODO(jian): use https://github.com/spf13/viper instead.
+// FileLoader static file loader TODO(jian): use https://github.com/spf13/viper instead.
 type FileLoader struct {
 	RulesFolder          string `default:"rules"`
 	RulesFolderRecursion bool   `default:"true"`
-	fsWatcherDirs        map[string]bool
 }
 
 func (fl *FileLoader) InjectConfig(config map[string]any) {
@@ -44,7 +41,6 @@ func (fl *FileLoader) InjectConfig(config map[string]any) {
 			fl.RulesFolderRecursion = recursion
 		}
 	}
-	fl.fsWatcherDirs = make(map[string]bool)
 }
 
 func (fl *FileLoader) GetRules() map[string]*conf.Rule {
@@ -81,10 +77,6 @@ func (fl *FileLoader) getRulesByPath(path string) map[string]*conf.Rule {
 				logger.Logger.Infoln(t)
 				rules[rule.UniqueId] = rule
 			}
-			fDir := BuiltPath.Dir(filePath)
-			if _, ok := fl.fsWatcherDirs[fDir]; !ok {
-				fl.fsWatcherDirs[fDir] = true
-			}
 		}
 		return rules
 	} else {
@@ -101,78 +93,23 @@ func (fl *FileLoader) getRulesByPath(path string) map[string]*conf.Rule {
 }
 
 func (fl *FileLoader) ReloadSchedulerJob(engine *ElasticAlert) {
-	engine.rules.Range(func(key, value any) bool {
-		alertRule := value.(*conf.Rule)
-		rule := alertRule
-		go fl.handleFileChange(rule.FilePath, engine)
-		return true
-	})
-	for fDir := range fl.fsWatcherDirs {
-		go fl.handleDirChange(fDir, engine)
+	logger.Logger.Infoln("scheduler job reloading...")
+	path := fl.RulesFolder
+	rules := fl.getRulesByPath(path)
+	for _, newRule := range rules {
+		p := newRule.FilePath
+		engine.rules.Store(newRule.UniqueId, newRule)
+		_, ok := engine.schedulers.Load(newRule.UniqueId)
+		if ok {
+			t := fmt.Sprintf("RELOAD %s success!", p)
+			logger.Logger.Infoln(t)
+			engine.restartJobScheduler(newRule)
+		} else {
+			t := fmt.Sprintf("ADD %s success!", p)
+			logger.Logger.Infoln(t)
+			engine.startJobScheduler(newRule)
+		}
 	}
-}
-
-func (fl *FileLoader) handleDirChange(path string, engine *ElasticAlert) {
-	logger.Logger.Infoln("Listen file watcher dir: " + path)
-	FsWatcher(path, func(event *fsnotify.Event, e error) {
-		if event.Has(fsnotify.Create) {
-			newPath := event.Name
-			if ok, _ := utils.PathExists(newPath); !ok {
-				return
-			}
-			if utils.IsDir(newPath) {
-				t := fmt.Sprintf("Create new dir %s, reloading...", newPath)
-				logger.Logger.Infoln(t)
-				if _, ok := fl.fsWatcherDirs[newPath]; !ok {
-					if fl.RulesFolderRecursion {
-						fl.handleDirChange(newPath, engine)
-					} else {
-						return
-					}
-				}
-			}
-			if !strings.HasSuffix(newPath, RuleFileSuffix) {
-				return
-			}
-			fl.handleFileChange(newPath, engine)
-			t := fmt.Sprintf("Create new file %s, reloading...", newPath)
-			logger.Logger.Infoln(t)
-			rules := fl.getRulesByPath(newPath)
-			for _, newRule := range rules {
-				p := newRule.FilePath
-				engine.rules.Store(newRule.UniqueId, newRule)
-				_, ok := engine.schedulers.Load(newRule.UniqueId)
-				if ok {
-					t := fmt.Sprintf("RELOAD %s success!", p)
-					logger.Logger.Infoln(t)
-					engine.restartJobScheduler(newRule)
-				} else {
-					t := fmt.Sprintf("ADD %s success!", p)
-					logger.Logger.Infoln(t)
-					engine.startJobScheduler(newRule)
-				}
-			}
-		}
-	})
-}
-
-func (fl *FileLoader) handleFileChange(filePath string, engine *ElasticAlert) {
-	FsWatcher(filePath, func(event *fsnotify.Event, e error) {
-		if event.Has(fsnotify.Write) {
-			t := fmt.Sprintf("File has change %s, reloading...", event.String())
-			logger.Logger.Infoln(t)
-			newRule, e := fl.getSingleRule(filePath)
-			if e != nil {
-				t := fmt.Sprintf("RELOAD %s failed reason: %s", filePath, e.Error())
-				logger.Logger.Warningln(t)
-			} else {
-				engine.rules.Store(newRule.UniqueId, newRule)
-				engine.restartJobScheduler(newRule)
-				t := fmt.Sprintf("RELOAD %s success!", filePath)
-				logger.Logger.Infoln(t)
-			}
-		}
-	})
 }
 
 func (fl *FileLoader) getSingleRule(path string) (*conf.Rule, error) {
@@ -228,43 +165,4 @@ func (fl *FileLoader) findRuleFiles(path string, files *[]string) {
 			}
 		}
 	}
-}
-
-// FsWatcher can listen file or dir change, if you get a change event, will call callback function
-func FsWatcher(path string, callback func(event *fsnotify.Event, e error)) {
-
-	// Create new watcher.
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		logger.Logger.Errorln(err)
-	}
-	defer watcher.Close()
-
-	// Start listening for events.
-	go func() {
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-				callback(&event, nil)
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				t := fmt.Sprintf("fsnotify watcher error %s", err.Error())
-				logger.Logger.Errorln(t)
-				callback(nil, err)
-			}
-		}
-	}()
-
-	// Add a path.
-	err = watcher.Add(path)
-	if err != nil {
-		logger.Logger.Errorln(err)
-	}
-
-	<-make(chan struct{})
 }

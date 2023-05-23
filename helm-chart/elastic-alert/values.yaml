@@ -9,9 +9,27 @@ image:
   repository: openinsight-proj/elastic-alert
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "633f1f001b75408abb57abbdb888ac96b1abd945"
+  tag: "f895106ab9907e47fe93c012d4aec2a52c049292"
+
+configReloader:
+  image:
+    registry: quay.m.daocloud.io
+    repository: prometheus-operator/prometheus-config-reloader
+    pullPolicy: IfNotPresent
+    tag: "v0.60.1"
+
+  resources: {}
+#    limits:
+#      cpu: 200m
+#      memory: 50Mi
+#    requests:
+#      cpu: 40m
+#      memory: 10Mi
 
 setUp:
+  server:
+    enabled: true
+    listen_addr: ":8080"
   exporter:
     enabled: true
     listen_addr: ":9003"
@@ -62,6 +80,9 @@ extraVolumes: []
 #       name: custom-rules-config
 
 extraVolumeMounts: []
+# mountpath must be the value of rules_folder configured in setup config,
+# because prometheus configmap reloader does not support folder recursive: https://github.com/prometheus-operator/prometheus-operator/blob/70e9708371a6dbdad716deab4fc6fc9a2d89ed1b/cmd/prometheus-config-reloader/main.go#LL65C2-L65C12
+# e.g. /rules
 # extraVolumeMounts:
 #   - name: custom-rules-configmap
 #     mountPath: /rules/custom-rules
@@ -99,7 +120,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 9003
+  port: 8080
 
 ingress:
   enabled: false
