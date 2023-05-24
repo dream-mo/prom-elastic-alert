@@ -22,12 +22,11 @@ type HttpServer struct {
 
 func (s *HttpServer) InitHttpServer() {
 	if s.ServerConfig.Server.Enabled {
-		rc := &controller.RuleCtrl{
+		s.ruleCtrl = &controller.RuleCtrl{
 			RService: &services.RuleService{
 				KubeClient: s.KubeClient,
 			},
 		}
-		s.ruleCtrl = rc
 
 		router := s.newRouter()
 		err := router.Run(s.ServerConfig.Server.ListenAddr)

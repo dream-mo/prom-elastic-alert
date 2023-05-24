@@ -43,10 +43,13 @@ func (rs *RuleService) ListRules(policy string, uniqueIds []string) ([]domain.Ru
 
 	rules := []domain.Rule{}
 	for cfgKey, cfgVal := range cfgMap.Data {
-		if _, found := filterCfgKeys[cfgKey]; !found {
-			// do not select this rule
-			continue
+		if len(filterCfgKeys) > 0 {
+			if _, found := filterCfgKeys[cfgKey]; !found {
+				// do not select this rule
+				continue
+			}
 		}
+
 		policyRule := domain.Rule{}
 		rule := model.Rule{}
 		jsonBytes, err := jsonYaml.YAMLToJSON([]byte(cfgVal))

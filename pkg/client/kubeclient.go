@@ -2,6 +2,7 @@ package client
 
 import (
 	"flag"
+	"k8s.io/client-go/rest"
 	"path/filepath"
 
 	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
@@ -53,7 +54,7 @@ func GetClientSet() (cclientset *kubernetes.Clientset, err error) {
 		return gClientset, nil
 	}
 	var kubeconfig *string
-	var clientset *kubernetes.Clientset
+	var config *rest.Config
 
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -61,16 +62,24 @@ func GetClientSet() (cclientset *kubernetes.Clientset, err error) {
 		kubeconfig = flag.String("kubeconfig", "~/.kube/config", "absolute path to the kubeconfig file")
 	}
 
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
-		return clientset, err
+		// try to create the in-cluster config
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			panic(err.Error())
+			return nil, err
+		}
 	}
 
-	clientset, err = kubernetes.NewForConfig(config)
+	gClientset, err = kubernetes.NewForConfig(config)
 	if err != nil {
-		return clientset, err
+		panic(err.Error())
+		return nil, err
 	}
-	gClientset = clientset
 
-	return clientset, nil
+	v, err := gClientset.ServerVersion()
+	logger.Logger.Infof("kube client with server version: %s", v.String())
+
+	return gClientset, nil
 }
