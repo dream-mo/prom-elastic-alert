@@ -2,21 +2,33 @@ package server
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/openinsight-proj/elastic-alert/pkg/boot"
+	"github.com/openinsight-proj/elastic-alert/pkg/client"
 	"github.com/openinsight-proj/elastic-alert/pkg/conf"
 	"github.com/openinsight-proj/elastic-alert/pkg/server/controller"
 	"github.com/openinsight-proj/elastic-alert/pkg/server/serializer"
+	"github.com/openinsight-proj/elastic-alert/pkg/server/services"
 	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
 )
 
 type HttpServer struct {
 	ServerConfig *conf.AppConfig
 	Ea           *boot.ElasticAlert
+	KubeClient   *client.KubeClient
+	ruleCtrl     *controller.RuleCtrl
 }
 
 func (s *HttpServer) InitHttpServer() {
 	if s.ServerConfig.Server.Enabled {
+		rc := &controller.RuleCtrl{
+			RService: &services.RuleService{
+				KubeClient: s.KubeClient,
+			},
+		}
+		s.ruleCtrl = rc
+
 		router := s.newRouter()
 		err := router.Run(s.ServerConfig.Server.ListenAddr)
 		if err != nil {
@@ -37,8 +49,11 @@ func (s *HttpServer) newRouter() *gin.Engine {
 	v1Route := r.Group("/v1")
 
 	{
-		//TODO:
-		v1Route.GET("/rules", controller.FindAllRules)
+		v1Route.GET("/rules", s.ruleCtrl.FindAllRules)
+		v1Route.GET("/rule", s.ruleCtrl.FindRule)
+		v1Route.POST("/rule", s.ruleCtrl.CreateOrUpdateRule)
+		v1Route.PUT("/rule", s.ruleCtrl.CreateOrUpdateRule)
+		v1Route.DELETE("/rule", s.ruleCtrl.DeleteRule)
 	}
 
 	return r

@@ -4,8 +4,9 @@ import (
 	"crypto/tls"
 	"net/http"
 
+	"github.com/openinsight-proj/elastic-alert/pkg/model"
+
 	elasticsearch7 "github.com/elastic/go-elasticsearch/v7"
-	"github.com/openinsight-proj/elastic-alert/pkg/conf"
 	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
 )
 
@@ -14,7 +15,7 @@ type ElasticClient interface {
 	CountByDSL(index string, dsl string) (int, int)
 }
 
-func NewElasticClient(esConfig conf.EsConfig, version string) ElasticClient {
+func NewElasticClient(esConfig model.EsConfig, version string) ElasticClient {
 	client, err := elasticsearch7.NewClient(elasticsearch7.Config{
 		Addresses: esConfig.Addresses,
 		Username:  esConfig.Username,

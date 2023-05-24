@@ -5,7 +5,8 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/model"
+
 	redisx "github.com/openinsight-proj/elastic-alert/pkg/utils/redis"
 	"github.com/openinsight-proj/elastic-alert/pkg/utils/xelastic"
 	"github.com/openinsight-proj/elastic-alert/pkg/utils/xtime"
@@ -37,7 +38,7 @@ func RenderAlertMessage(writer http.ResponseWriter, request *http.Request) {
 						return xtime.TimeFormatISO8601(xtime.Parse(m["@timestamp"].(string)))
 					},
 				}).Parse(htmlPage)
-				body := conf.BuildFindByIdsDSLBody(message.Ids)
+				body := model.BuildFindByIdsDSLBody(message.Ids)
 				client := xelastic.NewElasticClient(message.ES, message.ES.Version)
 				hits, _, _ := client.FindByDSL(message.Index, body, nil)
 				hitsStr, _ := json.Marshal(hits)

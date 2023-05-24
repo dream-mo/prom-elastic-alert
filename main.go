@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/openinsight-proj/elastic-alert/pkg/server"
 	"net/http"
 	"os"
 	"os/signal"
 	"runtime/debug"
 	"syscall"
+
+	"github.com/openinsight-proj/elastic-alert/pkg/client"
+	"github.com/openinsight-proj/elastic-alert/pkg/server"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/openinsight-proj/elastic-alert/pkg/boot"
@@ -51,12 +53,20 @@ func main() {
 	ea := boot.NewElasticAlert(c, &opts)
 	ea.Start()
 
-	//init http server
-	s := server.HttpServer{
-		ServerConfig: c,
-		Ea:           ea,
+	if c.Server.Enabled {
+		kc, err := client.NewKubeClient(c.Server.DB.Config)
+		if err != nil {
+			logger.Logger.Errorf("could not get kube clientset: %v.", err)
+		}
+
+		//init http server
+		s := server.HttpServer{
+			ServerConfig: c,
+			Ea:           ea,
+			KubeClient:   kc,
+		}
+		go s.InitHttpServer()
 	}
-	go s.InitHttpServer()
 
 	if c.Exporter.Enabled {
 		metrics := boot.NewRuleStatusCollector(ea)

@@ -7,7 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/model"
+
 	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
 	redisx "github.com/openinsight-proj/elastic-alert/pkg/utils/redis"
 	"github.com/prometheus/client_golang/prometheus"
@@ -91,7 +92,7 @@ func (rc *RuleStatusCollector) Collect(ch chan<- prometheus.Metric) {
 		rc.collectLinkRedisStatus(ch)
 	}
 	rc.Ea.rules.Range(func(key, value any) bool {
-		rule := value.(*conf.Rule)
+		rule := value.(*model.Rule)
 		rc.collectRuleStatus(ch, rule)
 		rc.collectQueryStatusMetrics(ch, rule)
 		if rc.Ea.appConf.Alert.Alertmanager.Enabled {
@@ -104,7 +105,7 @@ func (rc *RuleStatusCollector) Collect(ch chan<- prometheus.Metric) {
 	})
 }
 
-func (rc *RuleStatusCollector) collectQueryStatusMetrics(ch chan<- prometheus.Metric, rule *conf.Rule) {
+func (rc *RuleStatusCollector) collectQueryStatusMetrics(ch chan<- prometheus.Metric, rule *model.Rule) {
 	val, ok := rc.Ea.metrics.Load(rule.UniqueId)
 	if ok {
 		m := val.(*ElasticAlertPrometheusMetrics)
@@ -117,7 +118,7 @@ func (rc *RuleStatusCollector) collectQueryStatusMetrics(ch chan<- prometheus.Me
 	}
 }
 
-func (rc *RuleStatusCollector) collectElasticAlertMetrics(ch chan<- prometheus.Metric, rule *conf.Rule) {
+func (rc *RuleStatusCollector) collectElasticAlertMetrics(ch chan<- prometheus.Metric, rule *model.Rule) {
 	val, ok := rc.Ea.metrics.Load(rule.UniqueId)
 	if ok {
 		m := val.(*ElasticAlertPrometheusMetrics)
@@ -130,7 +131,7 @@ func (rc *RuleStatusCollector) collectElasticAlertMetrics(ch chan<- prometheus.M
 	}
 }
 
-func (rc *RuleStatusCollector) collectOpRedisMetrics(ch chan<- prometheus.Metric, rule *conf.Rule) {
+func (rc *RuleStatusCollector) collectOpRedisMetrics(ch chan<- prometheus.Metric, rule *model.Rule) {
 	val, ok := rc.Ea.metrics.Load(rule.UniqueId)
 	if ok {
 		m := val.(*ElasticAlertPrometheusMetrics)
@@ -143,7 +144,7 @@ func (rc *RuleStatusCollector) collectOpRedisMetrics(ch chan<- prometheus.Metric
 	}
 }
 
-func (rc *RuleStatusCollector) collectWebhookNotifyMetrics(ch chan<- prometheus.Metric, rule *conf.Rule) {
+func (rc *RuleStatusCollector) collectWebhookNotifyMetrics(ch chan<- prometheus.Metric, rule *model.Rule) {
 	val, ok := rc.Ea.metrics.Load(rule.UniqueId)
 	if ok {
 		m := val.(*ElasticAlertPrometheusMetrics)
@@ -172,7 +173,7 @@ func (rc *RuleStatusCollector) collectAppInfo(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(rc.AppInfoDesc, prometheus.GaugeValue, float64(1), Version)
 }
 
-func (rc *RuleStatusCollector) collectRuleStatus(ch chan<- prometheus.Metric, rule *conf.Rule) {
+func (rc *RuleStatusCollector) collectRuleStatus(ch chan<- prometheus.Metric, rule *model.Rule) {
 	v := float64(0)
 	if rule.Enabled {
 		v = 1

@@ -1,9 +1,10 @@
 package serializer
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	logger "github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
-	"net/http"
 )
 
 const (

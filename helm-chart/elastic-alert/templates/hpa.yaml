@@ -3,6 +3,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "elastic-alert.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "elastic-alert.labels" . | nindent 4 }}
 spec:

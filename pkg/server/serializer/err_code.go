@@ -5,7 +5,9 @@ import "net/http"
 type ErrorStr string
 
 const (
-	ErrBindJson            ErrorStr = "INVALID_ARGUMENT.1" // 二级错误吗
+	ErrBindJson            ErrorStr = "INVALID_ARGUMENT.1"
+	ErrCreate                       = "FAILED_TO_CREATE"
+	ErrDelete                       = "FAILED_TO_DELETE"
 	ErrGetFile                      = "INVALID_ARGUMENT.2"
 	ErrReqStringToInt               = "INVALID_ARGUMENT.3"
 	ErrEnvironment                  = "INVALID_ARGUMENT.4"

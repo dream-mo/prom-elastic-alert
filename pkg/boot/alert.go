@@ -8,7 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/model"
+
 	"github.com/openinsight-proj/elastic-alert/pkg/utils"
 )
 
@@ -20,7 +21,7 @@ const (
 )
 
 type AlertContent struct {
-	Rule     *conf.Rule
+	Rule     *model.Rule
 	Match    *Match
 	StartsAt *time.Time
 	EndsAt   *time.Time
@@ -35,9 +36,9 @@ type AlertMessage struct {
 }
 
 type AlertSampleMessage struct {
-	ES    conf.EsConfig `json:"es"`
-	Index string        `json:"index"`
-	Ids   []string      `json:"ids"`
+	ES    model.EsConfig `json:"es"`
+	Index string         `json:"index"`
+	Ids   []string       `json:"ids"`
 }
 
 func (ac *AlertContent) HasResolved() bool {

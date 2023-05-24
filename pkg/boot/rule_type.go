@@ -1,15 +1,15 @@
 package boot
 
 import (
-	"github.com/openinsight-proj/elastic-alert/pkg/utils/xtime"
 	"strings"
 	"time"
 
-	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/model"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils/xtime"
 )
 
 type Match struct {
-	r          *conf.Rule
+	r          *model.Rule
 	Ids        []string
 	StartsAt   time.Time
 	EndsAt     time.Time
@@ -21,14 +21,14 @@ func (mc *Match) Fingerprint() string {
 }
 
 type RuleType interface {
-	GetMatches(r *conf.Rule, hits []any) []Match
-	FilterMatchCondition(r *conf.Rule, matches []Match) *Match
+	GetMatches(r *model.Rule, hits []any) []Match
+	FilterMatchCondition(r *model.Rule, matches []Match) *Match
 }
 
 type FrequencyRule struct {
 }
 
-func (fr *FrequencyRule) FilterMatchCondition(r *conf.Rule, matches []Match) *Match {
+func (fr *FrequencyRule) FilterMatchCondition(r *model.Rule, matches []Match) *Match {
 	var match *Match
 	for _, m := range matches {
 		if uint(len(m.Ids)) >= r.Query.Config.NumEvents {
@@ -38,7 +38,7 @@ func (fr *FrequencyRule) FilterMatchCondition(r *conf.Rule, matches []Match) *Ma
 	}
 	return match
 }
-func (fr *FrequencyRule) GetMatches(r *conf.Rule, resultHits []any) []Match {
+func (fr *FrequencyRule) GetMatches(r *model.Rule, resultHits []any) []Match {
 	matches := make([]Match, 10)
 	hasAgg := false
 	var match Match

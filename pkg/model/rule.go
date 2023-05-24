@@ -1,4 +1,4 @@
-package conf
+package model
 
 import (
 	"encoding/json"
@@ -11,24 +11,34 @@ import (
 	"github.com/openinsight-proj/elastic-alert/pkg/utils/xtime"
 )
 
+type EsConfig struct {
+	Addresses   []string `json:"addresses" yaml:"addresses"`
+	Username    string   `json:"username" yaml:"username"`
+	Password    string   `json:"password" yaml:"password"`
+	ConnTimeout uint     `json:"conn_timeout" yaml:"conn_timeout" default:"10"`
+	Version     string   `json:"version" yaml:"version" default:"v7"`
+}
+
+type Query struct {
+	Type   string `json:"type" yaml:"type"`
+	Config struct {
+		Timeframe xtime.TimeLimit `json:"timeframe" yaml:"timeframe"`
+		NumEvents uint            `json:"num_events" yaml:"num_events"`
+	} `json:"config" yaml:"config"`
+	QueryString string            `json:"query_string" yaml:"query_string"`
+	Labels      map[string]string `json:"labels" yaml:"labels"`
+	Annotations map[string]string `json:"annotations" yaml:"annotations"`
+}
+
 type Rule struct {
-	UniqueId string          `yaml:"unique_id"`
-	Enabled  bool            `yaml:"enabled" default:"true"`
-	ES       EsConfig        `yaml:"es"`
-	Index    string          `yaml:"index"`
-	RunEvery xtime.TimeLimit `yaml:"run_every"`
-	Query    struct {
-		Type   string `yaml:"type"`
-		Config struct {
-			Timeframe xtime.TimeLimit `yaml:"timeframe"`
-			NumEvents uint            `yaml:"num_events"`
-		} `yaml:"config"`
-		QueryString string            `yaml:"query_string"`
-		Labels      map[string]string `yaml:"labels"`
-		Annotations map[string]string `yaml:"annotations"`
-	} `yaml:"query"`
-	RawContent string
-	FilePath   string
+	UniqueId   string          `json:"unique_id" yaml:"unique_id"`
+	Enabled    bool            `json:"enabled" yaml:"enabled" default:"true"`
+	ES         EsConfig        `json:"es" yaml:"es"`
+	Index      string          `json:"index" yaml:"index"`
+	RunEvery   xtime.TimeLimit `json:"run_every" yaml:"run_every"`
+	Query      Query           `json:"query" yaml:"query"`
+	RawContent string          `json:"-"`
+	FilePath   string          `json:"-"`
 }
 
 func (rl *Rule) GetQueryStringDSL(from int, size int, start time.Time, end time.Time) string {
@@ -144,61 +154,6 @@ func BuildFindByIdsDSLBody(ids []string) string {
 	bs, _ := json.Marshal(m)
 	return string(bs)
 }
-
-var AppYamlSchema = `
-type: object
-required: []
-properties:
-  exporter:
-    type: object
-    required: []
-    properties:
-      enabled: {type: boolean}
-      listen_addr: {type: string}
-  loader:
-    type: object
-    required: []
-    properties:
-      type: {type: string, enum: ["FileLoader", "FileWatcherLoader"]}
-      config: {type: object, required: [], properties: {rules_folder: {type: string}, rules_folder_recursion: {type: boolean}}}
-  alert:
-    type: object
-    required: []
-    properties:
-      alertmanager: {enabled: {type: boolean}, type: object, required: [], properties: {url: {type: string}, basic_auth: {type: object, required: [], properties: {username: {type: string}, password: {type: string}}}}}
-      generator: {type: object, required: [], properties: {base_url: {type: string}, expire: {type: object, required: [], properties: {days: {type: number}}}}}
-  redis:
-    type: object
-    required: []
-    properties:
-      addr: {type: string}
-      port: {type: number}
-      password: {type: string}
-      db: {type: number}
-  run_every:
-    type: object
-    required: []
-    properties:
-      seconds: {type: number}
-      minutes: {type: number}
-      days: {type: number}
-  buffer_time:
-    type: object
-    required: []
-    properties:
-      seconds: {type: number}
-      minutes: {type: number}
-      days: {type: number}
-  alert_time_limit:
-    type: object
-    required: []
-    properties:
-      seconds: {type: number}
-      minutes: {type: number}
-      days: {type: number}
-  max_scrolling_count:
-    type: number
-`
 
 var RuleYamlSchema = `
 type: object

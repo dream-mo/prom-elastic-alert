@@ -7,10 +7,11 @@ import (
 	BuiltPath "path"
 	"strings"
 
+	"github.com/openinsight-proj/elastic-alert/pkg/model"
+
 	"github.com/creasty/defaults"
 	"github.com/fsnotify/fsnotify"
 	jsonYaml "github.com/ghodss/yaml"
-	"github.com/openinsight-proj/elastic-alert/pkg/conf"
 	"github.com/openinsight-proj/elastic-alert/pkg/utils"
 	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
 	"github.com/xeipuuv/gojsonschema"
@@ -43,8 +44,8 @@ func (fl *FileWatcherLoader) InjectConfig(config map[string]any) {
 	fl.fsWatcherDirs = make(map[string]bool)
 }
 
-func (fl *FileWatcherLoader) GetRules() map[string]*conf.Rule {
-	rules := map[string]*conf.Rule{}
+func (fl *FileWatcherLoader) GetRules() map[string]*model.Rule {
+	rules := map[string]*model.Rule{}
 	defer func() {
 		logger.Logger.Debugln("end load rule file")
 		t := fmt.Sprintf("Total: %d items", len(rules))
@@ -56,8 +57,8 @@ func (fl *FileWatcherLoader) GetRules() map[string]*conf.Rule {
 	return rules
 }
 
-func (fl *FileWatcherLoader) getRulesByPath(path string) map[string]*conf.Rule {
-	rules := map[string]*conf.Rule{}
+func (fl *FileWatcherLoader) getRulesByPath(path string) map[string]*model.Rule {
+	rules := map[string]*model.Rule{}
 	exist, _ := utils.PathExists(path)
 	if !exist {
 		logger.Logger.Errorln("rules_folder " + path + " not exists")
@@ -99,7 +100,7 @@ func (fl *FileWatcherLoader) getRulesByPath(path string) map[string]*conf.Rule {
 func (fl *FileWatcherLoader) ReloadSchedulerJob(engine *ElasticAlert) {
 	logger.Logger.Infoln("scheduler job reloading...")
 	engine.rules.Range(func(key, value any) bool {
-		alertRule := value.(*conf.Rule)
+		alertRule := value.(*model.Rule)
 		rule := alertRule
 		go fl.handleFileChange(rule.FilePath, engine)
 		return true
@@ -191,14 +192,14 @@ func (fl *FileWatcherLoader) handleFileChange(filePath string, engine *ElasticAl
 	})
 }
 
-func (fl *FileWatcherLoader) getSingleRule(path string) (*conf.Rule, error) {
-	rule := conf.Rule{}
+func (fl *FileWatcherLoader) getSingleRule(path string) (*model.Rule, error) {
+	rule := model.Rule{}
 	_ = defaults.Set(rule)
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	} else {
-		ruleSchemaJson, _ := jsonYaml.YAMLToJSON([]byte(conf.RuleYamlSchema))
+		ruleSchemaJson, _ := jsonYaml.YAMLToJSON([]byte(model.RuleYamlSchema))
 		ruleSchemaLoader := gojsonschema.NewBytesLoader(ruleSchemaJson)
 		ruleConfJson, _ := jsonYaml.YAMLToJSON(content)
 		ruleConfLoader := gojsonschema.NewBytesLoader(ruleConfJson)

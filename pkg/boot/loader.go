@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/openinsight-proj/elastic-alert/pkg/model"
+
 	"github.com/creasty/defaults"
-	"github.com/openinsight-proj/elastic-alert/pkg/conf"
 )
 
 type Loader interface {
 	InjectConfig(config map[string]any)
-	GetRules() map[string]*conf.Rule
+	GetRules() map[string]*model.Rule
 	ReloadSchedulerJob(*ElasticAlert)
 }
 

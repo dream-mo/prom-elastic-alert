@@ -15,16 +15,8 @@ import (
 
 var AppConf *AppConfig
 
-type EsConfig struct {
-	Addresses   []string `yaml:"addresses"`
-	Username    string   `yaml:"username"`
-	Password    string   `yaml:"password"`
-	ConnTimeout uint     `yaml:"conn_timeout" default:"10"`
-	Version     string   `yaml:"version" default:"v7"`
-}
-
 type Datasource struct {
-	Type   string         `yaml:"type" default:"file"`
+	Type   string         `yaml:"type" default:"configmap"`
 	Config map[string]any `yaml:"config"`
 }
 
@@ -149,3 +141,58 @@ func GetAppConfig(path string) *AppConfig {
 	AppConf = c
 	return c
 }
+
+var AppYamlSchema = `
+type: object
+required: []
+properties:
+  exporter:
+    type: object
+    required: []
+    properties:
+      enabled: {type: boolean}
+      listen_addr: {type: string}
+  loader:
+    type: object
+    required: []
+    properties:
+      type: {type: string, enum: ["FileLoader", "FileWatcherLoader"]}
+      config: {type: object, required: [], properties: {rules_folder: {type: string}, rules_folder_recursion: {type: boolean}}}
+  alert:
+    type: object
+    required: []
+    properties:
+      alertmanager: {enabled: {type: boolean}, type: object, required: [], properties: {url: {type: string}, basic_auth: {type: object, required: [], properties: {username: {type: string}, password: {type: string}}}}}
+      generator: {type: object, required: [], properties: {base_url: {type: string}, expire: {type: object, required: [], properties: {days: {type: number}}}}}
+  redis:
+    type: object
+    required: []
+    properties:
+      addr: {type: string}
+      port: {type: number}
+      password: {type: string}
+      db: {type: number}
+  run_every:
+    type: object
+    required: []
+    properties:
+      seconds: {type: number}
+      minutes: {type: number}
+      days: {type: number}
+  buffer_time:
+    type: object
+    required: []
+    properties:
+      seconds: {type: number}
+      minutes: {type: number}
+      days: {type: number}
+  alert_time_limit:
+    type: object
+    required: []
+    properties:
+      seconds: {type: number}
+      minutes: {type: number}
+      days: {type: number}
+  max_scrolling_count:
+    type: number
+`

@@ -5,12 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/openinsight-proj/elastic-alert/pkg/utils"
 	"math"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/openinsight-proj/elastic-alert/pkg/model"
+	"github.com/openinsight-proj/elastic-alert/pkg/utils"
 
 	"github.com/creasty/defaults"
 	"github.com/go-co-op/gocron"
@@ -38,7 +40,7 @@ type ElasticAlert struct {
 	appConf    *conf.AppConfig
 	opts       *conf.FlagOption
 	Loader     Loader
-	rules      sync.Map // map[string]*conf.Rule
+	rules      sync.Map // map[string]*model.Rule
 	metrics    sync.Map // map[string]*ElasticAlertPrometheusMetrics
 	schedulers sync.Map // map[string]ElasticJob
 	alerts     sync.Map // map[string]AlertContent
@@ -88,12 +90,12 @@ func (ea *ElasticAlert) buildFQName(name string) string {
 	return prometheus.BuildFQName(namespace, "", name)
 }
 
-func (ea *ElasticAlert) restartJobScheduler(r *conf.Rule) {
+func (ea *ElasticAlert) restartJobScheduler(r *model.Rule) {
 	ea.stopJobScheduler(r)
 	ea.startJobScheduler(r)
 }
 
-func (ea *ElasticAlert) stopJobScheduler(r *conf.Rule) {
+func (ea *ElasticAlert) stopJobScheduler(r *model.Rule) {
 	j, ok := ea.schedulers.Load(r.UniqueId)
 	defer func() {
 		ea.rules.Delete(r.UniqueId)
@@ -129,7 +131,7 @@ func (ea *ElasticAlert) Stop() {
 	}
 }
 
-func (ea *ElasticAlert) startJobScheduler(r *conf.Rule) {
+func (ea *ElasticAlert) startJobScheduler(r *model.Rule) {
 	ea.stopJobScheduler(r)
 	ea.rules.Store(r.UniqueId, r)
 	jobScheduler := gocron.NewScheduler(xtime.Zone).SingletonMode()
@@ -148,7 +150,7 @@ func (ea *ElasticAlert) startJobScheduler(r *conf.Rule) {
 	}
 }
 
-func (ea *ElasticAlert) eval(r *conf.Rule) {
+func (ea *ElasticAlert) eval(r *model.Rule) {
 	hits := ea.runRuleQuery(r)
 	f := NewRuleType(r.Query.Type)
 	if f == nil {
@@ -160,7 +162,7 @@ func (ea *ElasticAlert) eval(r *conf.Rule) {
 	ea.filterMatches(r, f.FilterMatchCondition(r, matches))
 }
 
-func (ea *ElasticAlert) filterMatches(r *conf.Rule, match *Match) {
+func (ea *ElasticAlert) filterMatches(r *model.Rule, match *Match) {
 	alertVal, ok := ea.alerts.Load(r.UniqueId)
 	if ok {
 		alert := alertVal.(AlertContent)
@@ -209,7 +211,7 @@ func (ea *ElasticAlert) filterMatches(r *conf.Rule, match *Match) {
 	}
 }
 
-func (ea *ElasticAlert) runRuleQuery(r *conf.Rule) []any {
+func (ea *ElasticAlert) runRuleQuery(r *model.Rule) []any {
 	client := xelastic.NewElasticClient(r.ES, r.ES.Version)
 	hits := []any{}
 	size := 10000
@@ -283,7 +285,7 @@ func (ea *ElasticAlert) runRuleQuery(r *conf.Rule) []any {
 	return hits
 }
 
-func (ea *ElasticAlert) addQueryStatusMetrics(r *conf.Rule, statusCode int) {
+func (ea *ElasticAlert) addQueryStatusMetrics(r *model.Rule, statusCode int) {
 	f := r.GetMetricsQueryFingerprint(statusCode)
 	v, _ := ea.metrics.Load(r.UniqueId)
 	eam := v.(*ElasticAlertPrometheusMetrics)
@@ -306,7 +308,7 @@ func (ea *ElasticAlert) addQueryStatusMetrics(r *conf.Rule, statusCode int) {
 }
 
 func (ea *ElasticAlert) addOpRedisMetrics(uniqueId string, path string, cmd string, key string, status int) {
-	f := conf.GetMetricsOpRedisFingerprint(uniqueId, path, cmd, key, status)
+	f := model.GetMetricsOpRedisFingerprint(uniqueId, path, cmd, key, status)
 	v, _ := ea.metrics.Load(uniqueId)
 	if v != nil {
 		eam := v.(*ElasticAlertPrometheusMetrics)
@@ -330,7 +332,7 @@ func (ea *ElasticAlert) addOpRedisMetrics(uniqueId string, path string, cmd stri
 }
 
 func (ea *ElasticAlert) addWebhookNotifyMetrics(uniqueId string, path string, status int) {
-	f := conf.GetMetricsWebhookNotifyFingerprint(uniqueId, path, status)
+	f := model.GetMetricsWebhookNotifyFingerprint(uniqueId, path, status)
 	v, _ := ea.metrics.Load(uniqueId)
 	eam := v.(*ElasticAlertPrometheusMetrics)
 	metricsVal, ok := eam.WebhookNotify.Load(f)
@@ -351,7 +353,7 @@ func (ea *ElasticAlert) addWebhookNotifyMetrics(uniqueId string, path string, st
 
 // generate elastic alert metrics,
 func (ea *ElasticAlert) addAlertMetrics(uniqueId string, path string, key string, sampleMsg AlertSampleMessage) {
-	f := conf.GetMetricsAlertFingerprint(uniqueId, path, key)
+	f := model.GetMetricsAlertFingerprint(uniqueId, path, key)
 	v, _ := ea.metrics.Load(uniqueId)
 	if v != nil {
 		eam := v.(*ElasticAlertPrometheusMetrics)

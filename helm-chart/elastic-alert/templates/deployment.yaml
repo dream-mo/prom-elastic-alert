@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "elastic-alert.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "elastic-alert.labels" . | nindent 4 }}
 spec:
@@ -34,6 +35,9 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
+        - name: rules
+          configMap:
+            name: {{ include "elastic-alert.fullname" . }}-rules
         {{- if .Values.rules.builtIn.create }}
         - name: built-in-rules
           configMap:
@@ -59,6 +63,8 @@ spec:
           resources:
             {{- toYaml .Values.configReloader.resources | nindent 12 }}
           volumeMounts:
+            - name: rules
+              mountPath: /rules
             {{- if .Values.rules.builtIn.create }}
             - name: built-in-rules
               mountPath: /rules

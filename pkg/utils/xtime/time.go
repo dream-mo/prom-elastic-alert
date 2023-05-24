@@ -11,9 +11,9 @@ const (
 )
 
 type TimeLimit struct {
-	Seconds uint `yaml:"seconds"`
-	Minutes uint `yaml:"minutes"`
-	Days    uint `yaml:"days"`
+	Seconds uint `json:"seconds" yaml:"seconds"`
+	Minutes uint `json:"minutes" yaml:"minutes"`
+	Days    uint `json:"days" yaml:"days"`
 }
 
 func (t TimeLimit) GetTimeDuration() time.Duration {
