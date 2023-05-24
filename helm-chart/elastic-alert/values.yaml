@@ -9,14 +9,14 @@ image:
   repository: openinsight-proj/elastic-alert
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "58f783be1187c4518bb494f48450497c3b84e345"
+  tag: "c59b7896e1b679180900b3f0d025ae850883919e"
 
 configReloader:
   image:
-    registry: quay.m.daocloud.io
-    repository: prometheus-operator/prometheus-config-reloader
+    registry: docker.m.daocloud.io
+    repository: jimmidyson/configmap-reload
     pullPolicy: IfNotPresent
-    tag: "v0.60.1"
+    tag: "v0.3.0"
 
   resources: {}
 #    limits:

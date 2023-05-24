@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"github.com/xeipuuv/gojsonschema"
 	"strings"
 
 	jsonYaml "github.com/ghodss/yaml"
@@ -17,7 +19,36 @@ type RuleService struct {
 	KubeClient *client.KubeClient
 }
 
+// validateRuleConfig validate rule through yaml schema
+func validateRuleConfig(r *model.Rule) error {
+	ruleSchemaJson, _ := jsonYaml.YAMLToJSON([]byte(model.RuleYamlSchema))
+	ruleSchemaLoader := gojsonschema.NewBytesLoader(ruleSchemaJson)
+
+	jsonBytes, err := json.Marshal(&r)
+	if err != nil {
+		errorMsg := "rule config json marshal error: " + err.Error()
+		return errors.New(errorMsg)
+	}
+
+	ruleConfLoader := gojsonschema.NewBytesLoader(jsonBytes)
+	res, e := gojsonschema.Validate(ruleSchemaLoader, ruleConfLoader)
+	if e != nil {
+		errorMsg := "rule config schema error: " + e.Error()
+		return errors.New(errorMsg)
+	}
+
+	if !res.Valid() {
+		errorMsg := res.Errors()[0].String()
+		return errors.New(errorMsg)
+	}
+
+	return nil
+}
+
 func (rs *RuleService) CreateOrUpdateRule(rule *domain.Rule) error {
+	if err := validateRuleConfig(&rule.Rule); err != nil {
+		return err
+	}
 	cfgKey := rs.generateDataKey(rule.Policy, rule.Rule.UniqueId)
 	ruleConfig := rule.Rule
 	err := rs.upsertData(cfgKey, &ruleConfig)
@@ -149,7 +180,7 @@ func (rs *RuleService) upsertData(dataKey string, newRule *model.Rule) error {
 }
 
 func (rs *RuleService) generateDataKey(policy, uniqueId string) string {
-	return strings.Join([]string{policy, uniqueId}, "-")
+	return strings.Join([]string{policy, uniqueId}, "-") + ".rule.yaml"
 }
 
 func (rs *RuleService) splitPolicy(policyUniqueId string) string {

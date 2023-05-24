@@ -49,25 +49,22 @@ spec:
       containers:
         - name: init-config-reloader
           image: "{{ .Values.configReloader.image.registry }}/{{ .Values.configReloader.image.repository }}:{{ .Values.configReloader.image.tag }}"
-          command:
-            - /bin/prometheus-config-reloader
           args:
-            - '--watch-interval=5s'
-            - '--listen-address=:8081'
-            - '--watched-dir=/rules' # non-recursively: https://github.com/prometheus-operator/prometheus-operator/blob/70e9708371a6dbdad716deab4fc6fc9a2d89ed1b/cmd/prometheus-config-reloader/main.go#LL65C2-L65C12
-            - '--reload-url=http://127.0.0.1:8080/-/reload'
+            - '-volume-dir=/rules/customs'
+            - '-volume-dir=/rules/built-in'
+            - '-webhook-url=http://127.0.0.1:8080/-/reload'
           ports:
             - name: reloader-web
-              containerPort: 8081
+              containerPort: 9533
               protocol: TCP
           resources:
             {{- toYaml .Values.configReloader.resources | nindent 12 }}
           volumeMounts:
             - name: rules
-              mountPath: /rules
+              mountPath: /rules/customs
             {{- if .Values.rules.builtIn.create }}
             - name: built-in-rules
-              mountPath: /rules
+              mountPath: /rules/built-in
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
@@ -84,6 +81,8 @@ spec:
             {{- if .Values.rules.builtIn.create }}
             - name: built-in-rules
               mountPath: /rules/built-in
+            - name: rules
+              mountPath: /rules/customs
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
