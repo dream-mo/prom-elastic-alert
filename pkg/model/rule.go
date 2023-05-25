@@ -20,14 +20,16 @@ type EsConfig struct {
 }
 
 type Query struct {
-	Type   string `json:"type" yaml:"type"`
-	Config struct {
-		Timeframe xtime.TimeLimit `json:"timeframe" yaml:"timeframe"`
-		NumEvents uint            `json:"num_events" yaml:"num_events"`
-	} `json:"config" yaml:"config"`
+	Type        string            `json:"type" yaml:"type"`
+	Config      QueryConfig       `json:"config" yaml:"config"`
 	QueryString string            `json:"query_string" yaml:"query_string"`
 	Labels      map[string]string `json:"labels" yaml:"labels"`
 	Annotations map[string]string `json:"annotations" yaml:"annotations"`
+}
+
+type QueryConfig struct {
+	Timeframe xtime.TimeLimit `json:"timeframe" yaml:"timeframe"`
+	NumEvents uint            `json:"num_events" yaml:"num_events"`
 }
 
 type Rule struct {
