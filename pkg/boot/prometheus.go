@@ -61,8 +61,9 @@ type ElasticAlertMetrics struct {
 	//EsAddress string
 	Index string
 	Key   string
-	Ids   string
-	Value int64
+	//Ids   string
+	QueryString string
+	Value       int64
 }
 
 type RuleStatusCollector struct {
@@ -124,7 +125,7 @@ func (rc *RuleStatusCollector) collectElasticAlertMetrics(ch chan<- prometheus.M
 		m := val.(*ElasticAlertPrometheusMetrics)
 		m.ElasticAlert.Range(func(key, value any) bool {
 			v := value.(ElasticAlertMetrics)
-			labelValues := []string{v.UniqueId, v.Index, v.Ids}
+			labelValues := []string{v.UniqueId, v.Index, v.QueryString}
 			ch <- prometheus.MustNewConstMetric(rc.ElasticMetricsDesc, prometheus.CounterValue, float64(v.Value), labelValues...)
 			return true
 		})
@@ -229,7 +230,7 @@ func NewRuleStatusCollector(ea *ElasticAlert) *RuleStatusCollector {
 		ElasticMetricsDesc: prometheus.NewDesc(
 			ea.buildFQName("elastic_metrics_total"),
 			"Counter for each reported match",
-			[]string{"unique_id", "index", "ids"},
+			[]string{"unique_id", "index", "query_string"},
 			prometheus.Labels{},
 		),
 	}

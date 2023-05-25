@@ -6,18 +6,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/openinsight-proj/elastic-alert/pkg/model"
-	"github.com/openinsight-proj/elastic-alert/pkg/utils"
 
 	"github.com/creasty/defaults"
 	"github.com/go-co-op/gocron"
 	"github.com/go-redis/redis/v8"
 	"github.com/openinsight-proj/elastic-alert/pkg/conf"
+	"github.com/openinsight-proj/elastic-alert/pkg/model"
 	"github.com/openinsight-proj/elastic-alert/pkg/utils/alertmanager"
 	"github.com/openinsight-proj/elastic-alert/pkg/utils/logger"
 	redisx "github.com/openinsight-proj/elastic-alert/pkg/utils/redis"
@@ -358,24 +355,25 @@ func (ea *ElasticAlert) addAlertMetrics(uniqueId string, path string, key string
 	if v != nil {
 		eam := v.(*ElasticAlertPrometheusMetrics)
 		metricsVal, ok := eam.ElasticAlert.Load(f)
-		ids := strings.Join(utils.ESIdsLenLimit(sampleMsg.Ids), "|")
+		//ids := strings.Join(utils.ESIdsLenLimit(sampleMsg.Ids), "|")
 		if ok {
 			// update metrics
 			metric := metricsVal.(ElasticAlertMetrics)
 			metricCopy := metric
 			atomic.AddInt64(&metricCopy.Value, 1)
-			metricCopy.Ids = ids
+			//metricCopy.Ids = ids
 			eam.ElasticAlert.Store(f, metricCopy)
 		} else {
 			// create new
 			eam.ElasticAlert.Store(f, ElasticAlertMetrics{
 				UniqueId: uniqueId,
 				//Path:      path,
-				Key:   key,
-				Value: 1,
+				Key:         key,
+				Value:       1,
+				QueryString: sampleMsg.QueryString,
 				//EsAddress: strings.Join(sampleMsg.ES.Addresses, ","),
 				Index: sampleMsg.Index,
-				Ids:   ids,
+				//Ids:   ids,
 			})
 		}
 	}
@@ -386,9 +384,10 @@ func (ea *ElasticAlert) pushAlert() {
 		ruleUniqueId := key.(string)
 		alert := value.(AlertContent)
 		msg := AlertSampleMessage{
-			ES:    alert.Rule.ES,
-			Index: alert.Rule.Index,
-			Ids:   alert.Match.Ids,
+			ES:          alert.Rule.ES,
+			Index:       alert.Rule.Index,
+			Ids:         alert.Match.Ids,
+			QueryString: alert.Rule.Query.QueryString,
 		}
 
 		if ea.appConf.Alert.Alertmanager.Enabled {

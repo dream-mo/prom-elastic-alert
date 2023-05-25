@@ -36,9 +36,10 @@ type AlertMessage struct {
 }
 
 type AlertSampleMessage struct {
-	ES    model.EsConfig `json:"es"`
-	Index string         `json:"index"`
-	Ids   []string       `json:"ids"`
+	ES          model.EsConfig `json:"es"`
+	Index       string         `json:"index"`
+	Ids         []string       `json:"ids"`
+	QueryString string         `json:"query_string"`
 }
 
 func (ac *AlertContent) HasResolved() bool {
