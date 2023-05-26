@@ -9,7 +9,7 @@ metadata:
 spec:
   endpoints:
     - honorLabels: true
-      port: http
+      port: metrics
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
