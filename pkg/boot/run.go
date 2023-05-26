@@ -349,31 +349,26 @@ func (ea *ElasticAlert) addWebhookNotifyMetrics(uniqueId string, path string, st
 }
 
 // generate elastic alert metrics,
-func (ea *ElasticAlert) addAlertMetrics(uniqueId string, path string, key string, sampleMsg AlertSampleMessage) {
+func (ea *ElasticAlert) addAlertHitsMetrics(uniqueId string, path string, key string, sampleMsg AlertSampleMessage) {
 	f := model.GetMetricsAlertFingerprint(uniqueId, path, key)
 	v, _ := ea.metrics.Load(uniqueId)
 	if v != nil {
 		eam := v.(*ElasticAlertPrometheusMetrics)
 		metricsVal, ok := eam.ElasticAlert.Load(f)
-		//ids := strings.Join(utils.ESIdsLenLimit(sampleMsg.Ids), "|")
 		if ok {
 			// update metrics
 			metric := metricsVal.(ElasticAlertMetrics)
 			metricCopy := metric
-			atomic.AddInt64(&metricCopy.Value, 1)
-			//metricCopy.Ids = ids
+			metricCopy.Value = int64(len(sampleMsg.Ids))
 			eam.ElasticAlert.Store(f, metricCopy)
 		} else {
 			// create new
 			eam.ElasticAlert.Store(f, ElasticAlertMetrics{
-				UniqueId: uniqueId,
-				//Path:      path,
+				UniqueId:    uniqueId,
 				Key:         key,
-				Value:       1,
+				Value:       int64(len(sampleMsg.Ids)),
 				QueryString: sampleMsg.QueryString,
-				//EsAddress: strings.Join(sampleMsg.ES.Addresses, ","),
-				Index: sampleMsg.Index,
-				//Ids:   ids,
+				Index:       sampleMsg.Index,
 			})
 		}
 	}
@@ -394,7 +389,7 @@ func (ea *ElasticAlert) pushAlert() {
 			ea.pushToRedis(alert, msg)
 		}
 
-		go ea.addAlertMetrics(alert.Rule.UniqueId, alert.Rule.FilePath, redisx.AlertQueueListKey, msg)
+		go ea.addAlertHitsMetrics(alert.Rule.UniqueId, alert.Rule.FilePath, redisx.AlertQueueListKey, msg)
 
 		if alert.HasResolved() {
 			ea.alerts.Delete(ruleUniqueId)

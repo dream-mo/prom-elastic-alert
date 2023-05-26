@@ -126,7 +126,7 @@ func (rc *RuleStatusCollector) collectElasticAlertMetrics(ch chan<- prometheus.M
 		m.ElasticAlert.Range(func(key, value any) bool {
 			v := value.(ElasticAlertMetrics)
 			labelValues := []string{v.UniqueId, v.Index, v.QueryString}
-			ch <- prometheus.MustNewConstMetric(rc.ElasticMetricsDesc, prometheus.CounterValue, float64(v.Value), labelValues...)
+			ch <- prometheus.MustNewConstMetric(rc.ElasticMetricsDesc, prometheus.GaugeValue, float64(v.Value), labelValues...)
 			return true
 		})
 	}
@@ -228,8 +228,8 @@ func NewRuleStatusCollector(ea *ElasticAlert) *RuleStatusCollector {
 			prometheus.Labels{},
 		),
 		ElasticMetricsDesc: prometheus.NewDesc(
-			ea.buildFQName("elastic_metrics_total"),
-			"Counter for each reported match",
+			ea.buildFQName("hits"),
+			"Show hits/matched number for each rule query",
 			[]string{"unique_id", "index", "query_string"},
 			prometheus.Labels{},
 		),

@@ -10,6 +10,7 @@ spec:
   endpoints:
     - honorLabels: true
       port: metrics
+      interval: {{ .Values.serviceMonitor.interval }}
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}

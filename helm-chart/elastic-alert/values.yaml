@@ -65,9 +65,9 @@ serviceAccount:
 
 serviceMonitor:
   enabled: false
+  interval: "1s"
   additionalLabels: {}
 #    operator.insight.io/managed-by: insight
-
 podAnnotations: {}
 
 podSecurityContext: {}
