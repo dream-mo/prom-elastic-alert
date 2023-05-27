@@ -51,6 +51,7 @@ func (s *HttpServer) newRouter() *gin.Engine {
 		v1Route.GET("/rules", s.ruleCtrl.FindAllRules)
 		v1Route.GET("/rule", s.ruleCtrl.FindRule)
 		v1Route.POST("/rule", s.ruleCtrl.CreateOrUpdateRule)
+		v1Route.POST("/rule/batch", s.ruleCtrl.BatchCreateOrUpdateRule)
 		v1Route.PUT("/rule", s.ruleCtrl.CreateOrUpdateRule)
 		v1Route.DELETE("/rule", s.ruleCtrl.DeleteRule)
 	}

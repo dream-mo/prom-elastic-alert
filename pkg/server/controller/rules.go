@@ -49,10 +49,15 @@ func (rc *RuleCtrl) DeleteRule(c *gin.Context) {
 	ids := strings.Split(uniqueIds, ",")
 	var err error
 
-	if len(ids) == 1 {
-		err = rc.RService.DeleteRule(policy, ids[0])
+	if uniqueIds == "" {
+		// delete by policy
+		err = rc.RService.BatchDeleteRuleByPolicy(policy)
 	} else {
-		err = rc.RService.BatchDeleteRule(policy, ids)
+		if len(ids) > 1 {
+			err = rc.RService.BatchDeleteRule(policy, ids)
+		} else {
+			err = rc.RService.DeleteRule(policy, ids[0])
+		}
 	}
 
 	if err != nil {
@@ -82,5 +87,26 @@ func (rc *RuleCtrl) CreateOrUpdateRule(c *gin.Context) {
 	}
 
 	serializer.SuccessDataRes(c, "ok", fmt.Sprintf("create rule success"))
+	return
+}
+
+// BatchCreateOrUpdateRule batch create one rule or update by upsert data
+func (rc *RuleCtrl) BatchCreateOrUpdateRule(c *gin.Context) {
+	var rulesBody []*domain.Rule
+	err := c.BindJSON(&rulesBody)
+	if err != nil {
+		logger.Logger.Errorf("bind json body error: %v", err)
+		serializer.ErrorRes(c, serializer.ErrBindJson, fmt.Sprintf("bind json body error:%v", err))
+		return
+	}
+
+	err = rc.RService.BatchCreateOrUpdateRule(rulesBody)
+	if err != nil {
+		logger.Logger.Errorf("batch create rule error: %v", err)
+		serializer.ErrorRes(c, serializer.ErrCreate, fmt.Sprintf("batch create rule error:%v", err))
+		return
+	}
+
+	serializer.SuccessDataRes(c, "ok", fmt.Sprintf("batch create rule success"))
 	return
 }
