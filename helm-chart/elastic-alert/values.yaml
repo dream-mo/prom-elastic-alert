@@ -9,7 +9,7 @@ image:
   repository: openinsight-proj/elastic-alert
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "5f307c877cbfd9821c603ab1f0a2a8f2bc891f68"
+  tag: "8cd03486b387f66a6f97f27f3f035dafea73f289"
 
 configReloader:
   image:
