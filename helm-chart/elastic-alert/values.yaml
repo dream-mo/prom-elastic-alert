@@ -17,6 +17,10 @@ configReloader:
     repository: jimmidyson/configmap-reload
     pullPolicy: IfNotPresent
     tag: "v0.3.0"
+  command:
+    args:
+      - -webhook-url=http://127.0.0.1:8080/-/reload
+      - -volume-dir=/rules/customs
 
   resources: {}
 #    limits:
@@ -25,16 +29,6 @@ configReloader:
 #    requests:
 #      cpu: 40m
 #      memory: 10Mi
-
-# if esAddress is not empty, esAddress will be used as global configuration.
-rules:
-  builtIn:
-    # if true, helm chart will create a built-in rule.
-    create: false
-  es:
-    address: ""
-    username: ""
-    password: ""
 
 extraVolumes: []
 # extraVolumes:

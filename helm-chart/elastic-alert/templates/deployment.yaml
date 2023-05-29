@@ -38,21 +38,18 @@ spec:
         - name: rules
           configMap:
             name: {{ include "elastic-alert.fullname" . }}-rules
-        {{- if .Values.rules.builtIn.create }}
-        - name: built-in-rules
-          configMap:
-            name: {{ include "elastic-alert.fullname" . }}-built-in-rules
-        {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- end }}
       containers:
         - name: init-config-reloader
           image: "{{ .Values.configReloader.image.registry }}/{{ .Values.configReloader.image.repository }}:{{ .Values.configReloader.image.tag }}"
+      {{ if .Values.configReloader.command.args }}
           args:
-            - '-volume-dir=/rules/customs'
-            - '-volume-dir=/rules/built-in'
-            - '-webhook-url=http://127.0.0.1:8080/-/reload'
+          {{- range .Values.configReloader.command.args }}
+            - {{ . }}
+          {{- end }}
+      {{- end }}
           ports:
             - name: reloader-web
               containerPort: 9533
@@ -62,10 +59,6 @@ spec:
           volumeMounts:
             - name: rules
               mountPath: /rules/customs
-            {{- if .Values.rules.builtIn.create }}
-            - name: built-in-rules
-              mountPath: /rules/built-in
-            {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}
@@ -78,12 +71,8 @@ spec:
             - name: setup
               mountPath: '/etc/config.yaml'
               subPath: config.yaml
-            {{- if .Values.rules.builtIn.create }}
-            - name: built-in-rules
-              mountPath: /rules/built-in
             - name: rules
               mountPath: /rules/customs
-            {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}
