@@ -364,11 +364,12 @@ func (ea *ElasticAlert) addAlertHitsMetrics(uniqueId string, path string, key st
 		} else {
 			// create new
 			eam.ElasticAlert.Store(f, ElasticAlertMetrics{
-				UniqueId:    uniqueId,
-				Key:         key,
-				Value:       int64(len(sampleMsg.Ids)),
-				QueryString: sampleMsg.QueryString,
-				Index:       sampleMsg.Index,
+				UniqueId:     uniqueId,
+				Key:          key,
+				Value:        int64(len(sampleMsg.Ids)),
+				QueryString:  sampleMsg.QueryString,
+				BooleanQuery: sampleMsg.BooleanQuery,
+				Index:        sampleMsg.Index,
 			})
 		}
 	}
@@ -379,10 +380,11 @@ func (ea *ElasticAlert) pushAlert() {
 		ruleUniqueId := key.(string)
 		alert := value.(AlertContent)
 		msg := AlertSampleMessage{
-			ES:          alert.Rule.ES,
-			Index:       alert.Rule.Index,
-			Ids:         alert.Match.Ids,
-			QueryString: alert.Rule.Query.QueryString,
+			ES:           alert.Rule.ES,
+			Index:        alert.Rule.Index,
+			Ids:          alert.Match.Ids,
+			QueryString:  alert.Rule.Query.QueryString,
+			BooleanQuery: string(alert.Rule.Query.BooleanQuery),
 		}
 
 		if ea.appConf.Alert.Alertmanager.Enabled {

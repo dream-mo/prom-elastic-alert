@@ -36,10 +36,11 @@ type AlertMessage struct {
 }
 
 type AlertSampleMessage struct {
-	ES          model.EsConfig `json:"es"`
-	Index       string         `json:"index"`
-	Ids         []string       `json:"ids"`
-	QueryString string         `json:"query_string"`
+	ES           model.EsConfig `json:"es"`
+	Index        string         `json:"index"`
+	Ids          []string       `json:"ids"`
+	QueryString  string         `json:"query_string"`
+	BooleanQuery string         `json:"boolean_query"`
 }
 
 func (ac *AlertContent) HasResolved() bool {
