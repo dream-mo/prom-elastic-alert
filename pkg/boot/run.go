@@ -208,6 +208,17 @@ func (ea *ElasticAlert) filterMatches(r *model.Rule, match *Match) {
 	}
 }
 
+func getBufferTime(r *model.Rule, conf *conf.AppConfig) time.Duration {
+	if r.Query.Config.Timeframe.Days != 0 || r.Query.Config.Timeframe.Minutes != 0 || r.Query.Config.Timeframe.Seconds != 0 {
+		return r.Query.Config.Timeframe.GetTimeDuration()
+	}
+	if conf.BufferTime.Days != 0 || conf.BufferTime.Minutes != 0 || conf.BufferTime.Seconds != 0 {
+		return conf.BufferTime.GetTimeDuration()
+	}
+
+	return time.Minute
+}
+
 func (ea *ElasticAlert) runRuleQuery(r *model.Rule) []any {
 	client := xelastic.NewElasticClient(r.ES, r.ES.Version)
 	hits := []any{}
@@ -224,19 +235,15 @@ func (ea *ElasticAlert) runRuleQuery(r *model.Rule) []any {
 	if job.StartsAt == nil {
 		jobCopy := job
 		end = now
-		start = end.Add(-ea.appConf.BufferTime.GetTimeDuration())
+		start = end.Add(-getBufferTime(r, ea.appConf))
 		jobCopy.StartsAt = &start
 		jobCopy.EndsAt = &end
 		ea.schedulers.Store(r.UniqueId, jobCopy)
 	} else {
 		jobCopy := job
-		if now.Sub(*jobCopy.StartsAt) <= ea.appConf.BufferTime.GetTimeDuration() {
-			jobCopy.EndsAt = &now
-		} else {
-			jobCopy.EndsAt = &now
-			starts := now.Add(-ea.appConf.BufferTime.GetTimeDuration())
-			jobCopy.StartsAt = &starts
-		}
+		jobCopy.EndsAt = &now
+		starts := now.Add(-getBufferTime(r, ea.appConf))
+		jobCopy.StartsAt = &starts
 		end = *jobCopy.EndsAt
 		start = *jobCopy.StartsAt
 		ea.schedulers.Store(r.UniqueId, jobCopy)
@@ -366,6 +373,10 @@ func (ea *ElasticAlert) addAlertHitsMetrics(uniqueId string, path string, key st
 			eam.ElasticAlert.Store(f, ElasticAlertMetrics{
 				UniqueId:     uniqueId,
 				Key:          key,
+				Node:         sampleMsg.Node,
+				Workload:     sampleMsg.Workload,
+				Pod:          sampleMsg.Pod,
+				Namespace:    sampleMsg.Namespace,
 				Value:        int64(len(sampleMsg.Ids)),
 				QueryString:  sampleMsg.QueryString,
 				BooleanQuery: sampleMsg.BooleanQuery,
@@ -383,6 +394,10 @@ func (ea *ElasticAlert) pushAlert() {
 			ES:           alert.Rule.ES,
 			Index:        alert.Rule.Index,
 			Ids:          alert.Match.Ids,
+			Node:         alert.Rule.Query.Labels["node"],
+			Workload:     alert.Rule.Query.Labels["workload"],
+			Pod:          alert.Rule.Query.Labels["pod"],
+			Namespace:    alert.Rule.Query.Labels["namespace"],
 			QueryString:  alert.Rule.Query.QueryString,
 			BooleanQuery: string(alert.Rule.Query.BooleanQuery),
 		}

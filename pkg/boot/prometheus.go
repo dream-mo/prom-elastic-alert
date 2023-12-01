@@ -62,6 +62,10 @@ type ElasticAlertMetrics struct {
 	Index string
 	Key   string
 	//Ids   string
+	Node         string
+	Workload     string
+	Pod          string
+	Namespace    string
 	QueryString  string
 	BooleanQuery string
 	Value        int64
@@ -126,12 +130,7 @@ func (rc *RuleStatusCollector) collectElasticAlertMetrics(ch chan<- prometheus.M
 		m := val.(*ElasticAlertPrometheusMetrics)
 		m.ElasticAlert.Range(func(key, value any) bool {
 			v := value.(ElasticAlertMetrics)
-			var labelValues []string
-			if rc.Ea.opts.IsDebug() {
-				labelValues = []string{v.UniqueId, v.Index, v.QueryString, v.BooleanQuery}
-			} else {
-				labelValues = []string{v.UniqueId, v.Index}
-			}
+			labelValues := []string{v.UniqueId, v.Index, v.Node, v.Workload, v.Pod, v.Namespace}
 			ch <- prometheus.MustNewConstMetric(rc.ElasticMetricsDesc, prometheus.GaugeValue, float64(v.Value), labelValues...)
 			return true
 		})
@@ -236,12 +235,7 @@ func NewRuleStatusCollector(ea *ElasticAlert) *RuleStatusCollector {
 		ElasticMetricsDesc: prometheus.NewDesc(
 			ea.buildFQName("hits"),
 			"Show hits/matched number for each rule query",
-			func() []string {
-				if ea.opts.IsDebug() {
-					return []string{"unique_id", "index", "query_string", "boolean_query"}
-				}
-				return []string{"unique_id", "index"}
-			}(),
+			[]string{"unique_id", "index", "node", "workload", "pod", "namespace"},
 			prometheus.Labels{},
 		),
 	}

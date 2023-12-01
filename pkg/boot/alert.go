@@ -39,6 +39,10 @@ type AlertSampleMessage struct {
 	ES           model.EsConfig `json:"es"`
 	Index        string         `json:"index"`
 	Ids          []string       `json:"ids"`
+	Node         string         `json:"node"`
+	Workload     string         `json:"workload"`
+	Pod          string         `json:"pod"`
+	Namespace    string         `json:"namespace"`
 	QueryString  string         `json:"query_string"`
 	BooleanQuery string         `json:"boolean_query"`
 }

@@ -253,9 +253,9 @@ func (rs *RuleService) batchUpsertData(rules map[string]*model.Rule) error {
 }
 
 func (rs *RuleService) generateDataKey(policy, uniqueId string) string {
-	return strings.Join([]string{policy, uniqueId}, "-") + ".rule.yaml"
+	return strings.Join([]string{policy, uniqueId}, ".") + ".rule.yaml"
 }
 
 func (rs *RuleService) splitPolicy(policyUniqueId string) string {
-	return strings.Split(policyUniqueId, "-")[0]
+	return strings.Split(policyUniqueId, ".")[0]
 }
