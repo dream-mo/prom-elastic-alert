@@ -43,6 +43,7 @@ type AlertSampleMessage struct {
 	Workload     string         `json:"workload"`
 	Pod          string         `json:"pod"`
 	Namespace    string         `json:"namespace"`
+	Cluster      string         `json:"cluster"`
 	QueryString  string         `json:"query_string"`
 	BooleanQuery string         `json:"boolean_query"`
 }

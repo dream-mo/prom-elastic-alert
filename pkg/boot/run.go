@@ -377,6 +377,7 @@ func (ea *ElasticAlert) addAlertHitsMetrics(uniqueId string, path string, key st
 				Workload:     sampleMsg.Workload,
 				Pod:          sampleMsg.Pod,
 				Namespace:    sampleMsg.Namespace,
+				Cluster:      sampleMsg.Cluster,
 				Value:        int64(len(sampleMsg.Ids)),
 				QueryString:  sampleMsg.QueryString,
 				BooleanQuery: sampleMsg.BooleanQuery,
@@ -398,6 +399,7 @@ func (ea *ElasticAlert) pushAlert() {
 			Workload:     alert.Rule.Query.Labels["workload"],
 			Pod:          alert.Rule.Query.Labels["pod"],
 			Namespace:    alert.Rule.Query.Labels["namespace"],
+			Cluster:      alert.Rule.Query.Labels["cluster"],
 			QueryString:  alert.Rule.Query.QueryString,
 			BooleanQuery: string(alert.Rule.Query.BooleanQuery),
 		}
