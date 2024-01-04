@@ -155,20 +155,7 @@ func (fl *FileWatcherLoader) handleDirChange(path string, engine *ElasticAlert) 
 			t := fmt.Sprintf("Create new file %s, reloading...", newPath)
 			logger.Logger.Infoln(t)
 			rules := fl.getRulesByPath(newPath)
-			for _, newRule := range rules {
-				p := newRule.FilePath
-				engine.rules.Store(newRule.UniqueId, newRule)
-				_, ok := engine.schedulers.Load(newRule.UniqueId)
-				if ok {
-					t := fmt.Sprintf("RELOAD %s success!", p)
-					logger.Logger.Infoln(t)
-					engine.restartJobScheduler(newRule)
-				} else {
-					t := fmt.Sprintf("ADD %s success!", p)
-					logger.Logger.Infoln(t)
-					engine.startJobScheduler(newRule)
-				}
-			}
+			reload(rules, engine)
 		}
 	})
 }

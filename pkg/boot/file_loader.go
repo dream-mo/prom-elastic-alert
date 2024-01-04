@@ -97,20 +97,7 @@ func (fl *FileLoader) ReloadSchedulerJob(engine *ElasticAlert) {
 	logger.Logger.Infoln("scheduler job reloading...")
 	path := fl.RulesFolder
 	rules := fl.getRulesByPath(path)
-	for _, newRule := range rules {
-		p := newRule.FilePath
-		engine.rules.Store(newRule.UniqueId, newRule)
-		_, ok := engine.schedulers.Load(newRule.UniqueId)
-		if ok {
-			t := fmt.Sprintf("RELOAD %s success!", p)
-			logger.Logger.Infoln(t)
-			engine.restartJobScheduler(newRule)
-		} else {
-			t := fmt.Sprintf("ADD %s success!", p)
-			logger.Logger.Infoln(t)
-			engine.startJobScheduler(newRule)
-		}
-	}
+	reload(rules, engine)
 }
 
 func (fl *FileLoader) getSingleRule(path string) (*model.Rule, error) {
@@ -164,6 +151,31 @@ func (fl *FileLoader) findRuleFiles(path string, files *[]string) {
 					*files = append(*files, p)
 				}
 			}
+		}
+	}
+}
+
+func reload(rules map[string]*model.Rule, engine *ElasticAlert) {
+	// dropped rule
+	engine.rules.Range(func(key, value any) bool {
+		if rules[key.(string)] == nil {
+			r := value.(*model.Rule)
+			engine.stopJobScheduler(r)
+			logger.Logger.Infof("DELETE %s sucess!", r.FilePath)
+		}
+		return true
+	})
+
+	for _, newRule := range rules {
+		p := newRule.FilePath
+		engine.rules.Store(newRule.UniqueId, newRule)
+		_, ok := engine.schedulers.Load(newRule.UniqueId)
+		if ok {
+			logger.Logger.Infof("RELOAD %s success!", p)
+			engine.restartJobScheduler(newRule)
+		} else {
+			logger.Logger.Infof("ADD %s success!", p)
+			engine.startJobScheduler(newRule)
 		}
 	}
 }

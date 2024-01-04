@@ -273,7 +273,7 @@ func (ea *ElasticAlert) runRuleQuery(r *model.Rule) []any {
 			go func(p int, w *sync.WaitGroup) {
 				from = (p - 1) * size
 				dsl := r.GetQueryStringDSL(from, size, start, end)
-				resultHits, _, code := client.FindByDSL(r.Index, dsl, []string{"@timestamp"})
+				resultHits, _, code := client.FindByDSL(r.Index, dsl, []string{"time"})
 				ea.addQueryStatusMetrics(r, code)
 				lock.Lock()
 				hits = append(hits, resultHits...)
