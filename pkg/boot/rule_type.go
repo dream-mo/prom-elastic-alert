@@ -47,7 +47,7 @@ func (fr *FrequencyRule) GetMatches(r *model.Rule, resultHits []any) []Match {
 		m := item.(map[string]any)
 		_id := m["_id"].(string)
 		_source := m["_source"].(map[string]any)
-		timestamp := _source["@timestamp"].(string)
+		timestamp := _source["time"].(string)
 		ts := xtime.Parse(timestamp)
 		match.HitsNumber = len(resultHits)
 		if !hasAgg {
