@@ -1,5 +1,3 @@
-English | 中文
-
 prom-elastic-alert是一个基于查询Elasticsearch的告警组件. 
 
 如有帮助给个Star⭐鼓励一下~️
